@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Excess Inventory Management — Chipstock{% endblock %}
+
+{% block content %}
+{% set U = "/static/uploads" %}
+<main class="excess_page">
+
+    <section class="breadcrumbs_section">
+        <div class="breadcrumbs_wrap">
+            <div class="breadcrumbs">
+                <span><a href="/">Main</a></span>
+                <span> › </span>
+                <span><a href="/services">our services</a></span>
+                <span> › </span>
+                <span>excess inventory management</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="second_section">
+        <div class="second_wrap">
+            <div class="second_hero">
+                <h2 class="second_hero_title"><span style="color:#7d7d80;">Transform</span> your excess inventory into a source of revenue.</h2>
+                <p class="second_hero_text">Effortlessly manage excess and obsolete inventory with confidence. Our customized solutions are designed to meet your specific needs, offering a thorough assessment of your excess inventory's value and expert recommendations to maximize its recovery. Through our established partnerships, we create demand for your excess, enabling you to leverage our expertise to optimize your inventory value.</p>
+            </div>
+            <div class="second_cards">
+                <div class="second_card">
+                    <div class="second_card_header">
+                        <div class="second_card_dot"></div>
+                        <span class="second_card_number">01/</span>
+                    </div>
+                    <h3 class="second_card_title">Demand Match</h3>
+                    <p class="second_card_text">Utilize our global network and market intelligence to sell your excess inventory without it ever leaving your facility. Chipstock will actively connect your excess inventory with the needs of our vast customer base, identifying opportunities to sell and ensuring a seamless transaction.</p>
+                    <div class="second_card_image"><img src="{{ U }}/2025/04/Advanced-Analysis.png" alt="Demand Match" /></div>
+                </div>
+                <div class="second_card">
+                    <div class="second_card_header">
+                        <div class="second_card_dot"></div>
+                        <span class="second_card_number">02/</span>
+                    </div>
+                    <h3 class="second_card_title">Direct Purchase</h3>
+                    <p class="second_card_text">Swiftly remove excess and obsolete inventory from your shelves and balance sheet through a direct purchase. This efficient solution allows us to buy your inventory, protecting you from risk and minimizing the impact of value depreciation.</p>
+                    <div class="second_card_image"><img src="{{ U }}/2025/04/Component-Verification.png" alt="Direct Purchase" /></div>
+                </div>
+                <div class="second_card">
+                    <div class="second_card_header">
+                        <div class="second_card_dot"></div>
+                        <span class="second_card_number">03/</span>
+                    </div>
+                    <h3 class="second_card_title">Consignment</h3>
+                    <p class="second_card_text">Tailored specifically for OEM, EMS, and CEM customers, our consignment service allows you to offload your E&amp;O stock while you focus on your core business. We handle the redistribution, providing you with detailed monthly statements and access to a live portal.</p>
+                    <div class="second_card_image"><img src="{{ U }}/2025/04/Final-Quality-Approval.png" alt="Consignment" /></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="third_section">
+        <div class="third_wrap">
+            <div class="third_left">
+                <h2 class="third_title">Do you have excess inventory sitting around?</h2>
+                <p class="third_text">We're always procuring parts. Send us your excess inventory list and we'll get you an immediate offer.</p>
+            </div>
+            <div class="third_right">
+                <p class="third_form_title">Form</p>
+                <form class="excess_form" method="post" action="/excess/submit">
+                    <div class="field">
+                        <label>Name*</label>
+                        <p><span><input type="text" name="name" required></span></p>
+                    </div>
+                    <div class="field">
+                        <label>Company name*</label>
+                        <p><span><input type="text" name="company" required></span></p>
+                    </div>
+                    <div class="field">
+                        <label>E-mail*</label>
+                        <p><span><input type="email" name="email" required></span></p>
+                    </div>
+                    <div class="field">
+                        <label>Phone number*</label>
+                        <p><span><input type="text" name="phone" required></span></p>
+                    </div>
+                    <div class="field">
+                        <label>Quantity*</label>
+                        <p><span><input type="text" name="quantity" required></span></p>
+                    </div>
+                    <div class="field">
+                        <label>Part Number*</label>
+                        <p><span><input type="text" name="part_number" required></span></p>
+                    </div>
+                    <div class="field_upload">
+                        <label>CSV Upload</label>
+                        <div class="upload_box">
+                            <input type="file" name="csv_file" accept=".csv,.xlsx,.xls" style="display:none" id="csv-upload">
+                            <label for="csv-upload" style="cursor:pointer">Click or drag a file to this area to upload.</label>
+                        </div>
+                    </div>
+                    <button type="submit" class="submit_btn">Submit excess inventory request</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+</main>
+{% endblock %}

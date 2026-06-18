@@ -1,0 +1,432 @@
+{% extends "base.html" %}
+{% block title %}Chipstock — Global Electronic Components Distributor{% endblock %}
+
+{% block content %}
+{% set U = "/static/uploads" %}
+<main class="home_page">
+
+    {# ── Section 1: Hero ── #}
+    <section class="first_section">
+        <div class="first_content">
+            <article class="first_title white all_text"><h1><span style="color:#7d7d80;">Your Global Partner </span>in Electronic Supply Chain <span class="border">Solutions</span></h1></article>
+            <div class="header-search">
+                <form class="search-panel" method="get" action="/catalog" role="search">
+                    <input class="js-input-search" id="search-input" type="search" name="q" placeholder="Search part number or keyword…" autocomplete="off" spellcheck="false">
+                    <button type="submit" class="is-search-submit">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="9" cy="9" r="7" stroke="currentColor" stroke-width="2"/>
+                            <path d="M14 14L19 19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+                </form>
+            </div>
+            <p class="first_text">Reliable sourcing. From shortages to obsolete parts we get you the parts you need, on time.</p>
+        </div>
+        <div class="first_video">
+            <video loop autoplay muted playsinline poster="{{ U }}/2025/04/poster.webp">
+                <source src="{{ U }}/2025/04/dustin-homepage-revised.mp4" type="video/mp4">
+            </video>
+        </div>
+    </section>
+
+    {# ── Section 2: Stats ── #}
+    <section class="second_section">
+        <div class="second_wrap">
+            <div class="second_fon"></div>
+            <div class="second_left">
+                <h2 class="second_title">
+                    <span class="second_number">01/</span>
+                    Who we are?
+                </h2>
+                <div class="second_link">
+                    <a class="link_basic" href="/about">About us
+                        <svg class="link-arrow" width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 9H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M10 3L16 9L10 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </a>
+                </div>
+            </div>
+            <div class="second_right">
+                <article class="second_text">With over 18 years of experience, Chipstock has been a trusted partner for OEM, EMS and procurement professionals worldwide, delivering components on time and on spec.</article>
+                <div class="second_items">
+                    <div class="second_item">
+                        <span class="second_item_top"><span class="second_item_number counterup">18</span><span class="second_item_letter">+</span></span>
+                        <p class="second_item_text">Years of Industry Experience</p>
+                    </div>
+                    <div class="second_item">
+                        <span class="second_item_top"><span class="second_item_number counterup">22</span><span class="second_item_letter">M+</span></span>
+                        <p class="second_item_text">Parts Shipped Worldwide</p>
+                    </div>
+                    <div class="second_item">
+                        <span class="second_item_top"><span class="second_item_number counterup">37</span><span class="second_item_letter">+</span></span>
+                        <p class="second_item_text">Countries Served Worldwide</p>
+                    </div>
+                </div>
+            </div>
+            <div class="second_mob_link">
+                <a class="link_basic" href="/about">About us
+                    <svg class="link-arrow" width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 9H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M10 3L16 9L10 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </a>
+            </div>
+        </div>
+        <script>
+            $(document).ready(function() {
+                var observer = new IntersectionObserver(function(entries, observer) {
+                    entries.forEach(function(entry) {
+                        if (entry.isIntersecting) {
+                            $(entry.target).prop("Counter", 0).animate({ Counter: $(entry.target).text() }, {
+                                duration: 4000, easing: "linear",
+                                step: function(now) { $(entry.target).text(Math.ceil(now)); }
+                            });
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                });
+                $(".counterup").each(function() { observer.observe(this); });
+            });
+        </script>
+    </section>
+
+    {# ── Section 3: Services Cards ── #}
+    <section class="third_section">
+        <div class="third_wrap">
+            <div class="third_fon_one"></div>
+            <div class="third_fon_two"></div>
+            <div class="third_wrapper">
+                <div class="third_circle_one"></div>
+                <div class="third_circle_two"></div>
+                <div class="third_circle_third"></div>
+                <div class="third_circle_fourth"></div>
+                <div class="third_top">
+                    <h2 class="third_title"><span class="third_number">02/</span> Our Services</h2>
+                    <div class="third_link">
+                        <a class="link_basic" href="/services">All Services
+                            <svg class="link-arrow" width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 9H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M10 3L16 9L10 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </a>
+                    </div>
+                </div>
+                <div class="third_items">
+                    <div class="third_item variant_1">
+                        <a href="/about">
+                            <div class="third_item_inner">
+                                <article class="third_item_number">01</article>
+                                <article class="third_item_title">Shortage &amp; Obsolete Sourcing</article>
+                                <article class="third_item_text">We locate hard-to-find and end-of-life components from our global network of verified suppliers.</article>
+                                <div class="third_item_image"><img src="{{ U }}/2025/04/Obsolete-End-of-Life-Sourcing.jpg" alt="Obsolete Sourcing" /></div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="third_item variant_2">
+                        <a href="/quality">
+                            <div class="third_item_inner" style="background-color: #B6F223;">
+                                <span class="third_item_number">02</span>
+                                <article class="third_item_title">Testing &amp; Quality Verification</article>
+                                <article class="third_item_text">Every component passes multi-stage inspection — optical, electrical and X-ray — before it ships.</article>
+                                <div class="third_item_image"><img src="{{ U }}/2025/04/Testing-Compliance.png" alt="Testing Quality" /></div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="third_item variant_2">
+                        <a href="/contact">
+                            <div class="third_item_inner" style="background-color: #0B0B0B;">
+                                <span class="third_item_number">03</span>
+                                <article class="third_item_title">Excess Inventory Management</article>
+                                <article class="third_item_text">Turn excess stock into cash. We buy and redistribute surplus electronic components worldwide.</article>
+                                <div class="third_item_image"><img src="{{ U }}/2025/03/shortage-sourcing.jpg" alt="Excess Inventory" /></div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="third_item variant_2">
+                        <a href="/about">
+                            <div class="third_item_inner" style="background-color: #1c1c22;">
+                                <span class="third_item_number">04</span>
+                                <article class="third_item_title">Factory Direct Procurement</article>
+                                <article class="third_item_text">Volume orders placed directly with authorised manufacturers for the best lead times and pricing.</article>
+                                <div class="third_item_image"><img src="{{ U }}/2025/03/factory-direct.jpg" alt="Factory Direct" /></div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="third_link third_mob_link">
+                <a class="link_basic" href="/services">All Services
+                    <svg class="link-arrow" width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 9H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M10 3L16 9L10 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    {# ── Section 4: Why Chipstock Accordion ── #}
+    <section class="fourth_section">
+        <div class="fourth_wrap">
+            <h2 class="fourth_title"><span class="fourth_number">03/</span> Why Chipstock</h2>
+            <div class="fourth_items">
+                <div class="homepage_fourth_item" style="background-color: #f5f5f5;">
+                    <div class="homepage_fourth_item_inner">
+                        <h3 class="fourth_item_title" style="color: #0B0B0B;">Authentic Components</h3>
+                        <div class="fourth_item_wrap">
+                            <div class="fourth_item_left">
+                                <p class="fourth_item_text" style="color: #444444;">Every component we supply passes rigorous authenticity and quality checks before shipment.</p>
+                                <span class="fourth_item_number">01</span>
+                                <div class="homepage_fourth_item_arrow" style="background-color: #B6F223;">
+                                    <svg width="25" height="25" viewBox="0 0 25 25" fill="none"><path d="M3.5 12.5L21 12.5" stroke="#0B0B0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M14.5 19.5L21.5 12.5L14.5 5.5" stroke="#0B0B0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                </div>
+                            </div>
+                            <div class="fourth_item_right"><img src="{{ U }}/2025/04/Advanced-Analysis.png" alt="Analysis" /></div>
+                        </div>
+                        <span class="fourth_mob_item_number fourth_item_number">01</span>
+                    </div>
+                    <p class="fourth_item_quote">Zero tolerance for counterfeits.</p>
+                </div>
+                <div class="homepage_fourth_item" style="background-color: #0B0B0B;">
+                    <div class="homepage_fourth_item_inner">
+                        <h3 class="fourth_item_title" style="color: #ffffff;">Global Reach</h3>
+                        <div class="fourth_item_wrap">
+                            <div class="fourth_item_left">
+                                <p class="fourth_item_text" style="color: #aaaaaa;">Offices in Munich, Hong Kong and Taiwan give us 24/7 coverage across every major supply market.</p>
+                                <span class="fourth_item_number">02</span>
+                                <div class="homepage_fourth_item_arrow" style="background-color: #B6F223;">
+                                    <svg width="25" height="25" viewBox="0 0 25 25" fill="none"><path d="M3.5 12.5L21 12.5" stroke="#0B0B0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M14.5 19.5L21.5 12.5L14.5 5.5" stroke="#0B0B0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                </div>
+                            </div>
+                            <div class="fourth_item_right"><img src="{{ U }}/2025/04/ee198b1cf1ca06efbe8f0c62f4dfca04.webp" alt="Global" /></div>
+                        </div>
+                        <span class="fourth_mob_item_number fourth_item_number">02</span>
+                    </div>
+                    <p class="fourth_item_quote">Your trusted partner across every time zone.</p>
+                </div>
+                <div class="homepage_fourth_item" style="background-color: #B6F223;">
+                    <div class="homepage_fourth_item_inner">
+                        <h3 class="fourth_item_title" style="color: #0B0B0B;">Fast Turnaround</h3>
+                        <div class="fourth_item_wrap">
+                            <div class="fourth_item_left">
+                                <p class="fourth_item_text" style="color: #333333;">Same-day quoting and expedited logistics mean you never miss a production deadline.</p>
+                                <span class="fourth_item_number">03</span>
+                                <div class="homepage_fourth_item_arrow" style="background-color: #0B0B0B;">
+                                    <svg width="25" height="25" viewBox="0 0 25 25" fill="none"><path d="M3.5 12.5L21 12.5" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M14.5 19.5L21.5 12.5L14.5 5.5" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                </div>
+                            </div>
+                            <div class="fourth_item_right"><img src="{{ U }}/2025/04/Component-Verification.png" alt="Verification" /></div>
+                        </div>
+                        <span class="fourth_mob_item_number fourth_item_number">03</span>
+                    </div>
+                    <p class="fourth_item_quote">Speed and reliability when you need it most.</p>
+                </div>
+            </div>
+        </div>
+        <script>
+            $('.homepage_fourth_item').each(function() {
+                $(this).click(function(e) {
+                    e.preventDefault();
+                    if (!$(this).closest('.homepage_fourth_item').hasClass('active')) {
+                        $('.homepage_fourth_item').removeClass('active');
+                        $(this).closest('.homepage_fourth_item').addClass('active');
+                    }
+                });
+                $('.homepage_fourth_item:first').addClass('active');
+            });
+        </script>
+    </section>
+
+    {# ── Section 5: Brand Logos Marquee ── #}
+    <section class="five_section">
+        <div class="five_wrap">
+            <div class="five_fon"></div>
+            <div class="five_top">
+                <h2 class="five_title"><span class="five_number">04/</span> Trusted Brands</h2>
+                <div class="five_link">
+                    <a class="link_basic" href="/products">All Products
+                        <svg class="link-arrow" width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 9H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M10 3L16 9L10 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </a>
+                </div>
+            </div>
+            <div class="five_wrapper">
+                <div class="five_items">
+                    <div class="five_item"><img src="{{ U }}/2025/06/abb.png" alt="ABB"/></div>
+                    <div class="five_item"><img src="{{ U }}/2025/06/altera.png" alt="Altera"/></div>
+                    <div class="five_item"><img src="{{ U }}/2025/06/amp.png" alt="AMP"/></div>
+                    <div class="five_item"><img src="{{ U }}/2025/06/amphenol.png" alt="Amphenol"/></div>
+                    <div class="five_item"><img src="{{ U }}/2025/06/analog-devices.jpg" alt="Analog Devices"/></div>
+                    <div class="five_item"><img src="{{ U }}/2025/06/atmel.png" alt="Atmel"/></div>
+                    <div class="five_item"><img src="{{ U }}/2025/06/broadcom.png" alt="Broadcom"/></div>
+                    <div class="five_item"><img src="{{ U }}/2025/06/cisco.png" alt="Cisco"/></div>
+                    <div class="five_item"><img src="{{ U }}/2025/06/cypress-semiconductor.png" alt="Cypress"/></div>
+                    <div class="five_item"><img src="{{ U }}/2025/06/fairchild.png" alt="Fairchild"/></div>
+                    <div class="five_item"><img src="{{ U }}/2025/06/fujitsu.png" alt="Fujitsu"/></div>
+                    <div class="five_item"><img src="{{ U }}/2025/06/hitachi.png" alt="Hitachi"/></div>
+                    <div class="five_item"><img src="{{ U }}/2025/06/honeywell.png" alt="Honeywell"/></div>
+                    <div class="five_item"><img src="{{ U }}/2025/04/intel.png" alt="Intel"/></div>
+                    <div class="five_item"><img src="{{ U }}/2025/06/kemet.png" alt="Kemet"/></div>
+                    <div class="five_item"><img src="{{ U }}/2025/06/linear-technology.png" alt="Linear Technology"/></div>
+                    <div class="five_item"><img src="{{ U }}/2025/06/maxim-integrated-products.png" alt="Maxim"/></div>
+                    <div class="five_item"><img src="{{ U }}/2025/06/microchip.png" alt="Microchip"/></div>
+                    <div class="five_item"><img src="{{ U }}/2025/06/molex.png" alt="Molex"/></div>
+                    <div class="five_item"><img src="{{ U }}/2025/06/murata.png" alt="Murata"/></div>
+                    <div class="five_item"><img src="{{ U }}/2025/06/nxp.png" alt="NXP"/></div>
+                    <div class="five_item"><img src="{{ U }}/2025/06/on-semiconductor.png" alt="ON Semi"/></div>
+                    <div class="five_item"><img src="{{ U }}/2025/06/panasonic.png" alt="Panasonic"/></div>
+                    <div class="five_item"><img src="{{ U }}/2025/06/philips.png" alt="Philips"/></div>
+                    <div class="five_item"><img src="{{ U }}/2025/06/renesas.png" alt="Renesas"/></div>
+                    <div class="five_item"><img src="{{ U }}/2025/06/rohm.png" alt="ROHM"/></div>
+                    <div class="five_item"><img src="{{ U }}/2025/04/samsung.png" alt="Samsung"/></div>
+                    <div class="five_item"><img src="{{ U }}/2025/06/siemens.png" alt="Siemens"/></div>
+                    <div class="five_item"><img src="{{ U }}/2025/06/sony.png" alt="Sony"/></div>
+                    <div class="five_item"><img src="{{ U }}/2025/06/st-microelectronics.png" alt="STMicro"/></div>
+                    <div class="five_item"><img src="{{ U }}/2025/06/tdk.png" alt="TDK"/></div>
+                    <div class="five_item"><img src="{{ U }}/2025/06/texas-instruments.png" alt="TI"/></div>
+                    <div class="five_item"><img src="{{ U }}/2025/06/toshiba.png" alt="Toshiba"/></div>
+                    <div class="five_item"><img src="{{ U }}/2025/06/vishay.png" alt="Vishay"/></div>
+                    <div class="five_item"><img src="{{ U }}/2025/06/xilinx.png" alt="Xilinx"/></div>
+                </div>
+            </div>
+            <div class="five_mob_link five_link">
+                <a class="link_basic" href="/products">All Products
+                    <svg class="link-arrow" width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 9H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M10 3L16 9L10 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </a>
+            </div>
+        </div>
+        <script>
+            $(function() {
+                var $track = $('.five_items');
+                var trackWidth = $track.width();
+                $track.append($track.html());
+                function scroll() {
+                    $track.animate({ left: -trackWidth }, trackWidth * 20, 'linear', function() {
+                        $track.css('left', 0); scroll();
+                    });
+                }
+                scroll();
+            });
+        </script>
+    </section>
+
+    {# ── Section 6: How It Works ── #}
+    <section class="six_section">
+        <div class="six_wrap">
+            <div class="six_video">
+                <video loop autoplay muted playsinline poster="{{ U }}/2025/04/poster.webp">
+                    <source src="{{ U }}/2025/04/455224_earth_globe_1280x720.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="six_top">
+                <h2 class="six_title"><span class="six_number">05/</span> How It Works</h2>
+                <div class="six_link">
+                    <a class="link_basic" href="/contact">Get Started
+                        <svg class="link-arrow" width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 9H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M10 3L16 9L10 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </a>
+                </div>
+            </div>
+            <div class="six_items home_six_items">
+                <div class="six_item home_six_item">
+                    <span class="six_item_number">01</span>
+                    <div class="six_item_content">
+                        <h3 class="six_item_title">Submit Your Request</h3>
+                        <p class="six_item_text">Send us your BOM, part numbers, or a description of what you need. We respond within hours.</p>
+                    </div>
+                    <div class="six_item_image home_six_item_image"><img src="{{ U }}/2025/03/shortage-sourcing.jpg" alt="Request" /></div>
+                    <div class="home_btn_arrow_up"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 19V5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M5 12L12 5L19 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                </div>
+                <div class="six_item home_six_item">
+                    <span class="six_item_number">02</span>
+                    <div class="six_item_content">
+                        <h3 class="six_item_title">We Source &amp; Verify</h3>
+                        <p class="six_item_text">Our team locates components from our global network and verifies every unit for authenticity.</p>
+                    </div>
+                    <div class="six_item_image home_six_item_image"><img src="{{ U }}/2025/04/Testing-Compliance.png" alt="Verify" /></div>
+                    <div class="home_btn_arrow_up"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 19V5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M5 12L12 5L19 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                </div>
+                <div class="six_item home_six_item">
+                    <span class="six_item_number">03</span>
+                    <div class="six_item_content">
+                        <h3 class="six_item_title">Fast Delivery</h3>
+                        <p class="six_item_text">Receive fully documented, quality-certified components at your door — fast.</p>
+                    </div>
+                    <div class="six_item_image home_six_item_image"><img src="{{ U }}/2025/04/Final-Quality-Approval.png" alt="Delivery" /></div>
+                    <div class="home_btn_arrow_up"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 19V5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M5 12L12 5L19 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                </div>
+            </div>
+            <div class="six_mob_link six_link">
+                <a class="link_basic" href="/contact">Get Started
+                    <svg class="link-arrow" width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 9H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M10 3L16 9L10 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </a>
+            </div>
+        </div>
+        <script>
+            if (jQuery(window).innerWidth() > 768) {
+                $('.home_btn_arrow_up').click(function() {
+                    var hzCL = $(this).parent().hasClass('active');
+                    $('.home_six_item').removeClass('active');
+                    if (hzCL == false) { $(this).parent().addClass('active'); }
+                });
+                $('.home_six_item:first').addClass('active');
+            }
+            if (jQuery(window).innerWidth() < 768) {
+                $('.home_btn_arrow_up').click(function() {
+                    var hzCL = $(this).parent().hasClass('active');
+                    $('.home_six_items > .home_six_item').removeClass('active');
+                    if (hzCL == false) { $(this).parent().addClass('active'); }
+                });
+                $('.home_six_items .home_six_item:first').addClass('active');
+            }
+        </script>
+    </section>
+
+    {# ── Section 7: Latest News ── #}
+    <section class="seven_section">
+        <div class="seven_wrap">
+            <div class="seven_top">
+                <h2 class="seven_title"><span class="seven_number">06/</span> Latest News</h2>
+                <div class="seven_link">
+                    <a class="link_basic" href="/news">All News
+                        <svg class="link-arrow" width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 9H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M10 3L16 9L10 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </a>
+                </div>
+            </div>
+            <div class="seven_items home-seven-carousel">
+                <a class="seven_item" href="/news">
+                    <div class="seven_item_image"><img src="{{ U }}/2025/06/chip-stock_award-logo-pdf.jpg" alt="Top Distributors 2025"></div>
+                    <div class="seven_tem_content">
+                        <div class="seven_item_date">June 4, 2025</div>
+                        <span class="seven_item_title">Chip Stock Named Among the 2025 Top North American Independent Distributors</span>
+                        <p class="seven_item_text">Chip Stock has been recognized as one of the top independent electronic component distributors in North America for 2025 by Supply Chain Connect.</p>
+                    </div>
+                    <div class="seven_item_link"><svg class="link-arrow" width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 9H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M10 3L16 9L10 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                </a>
+                <a class="seven_item" href="/news">
+                    <div class="seven_item_image"><img src="{{ U }}/2025/06/news-images/Top-Distributors-2023.png" alt="Top Distributor Award"></div>
+                    <div class="seven_tem_content">
+                        <div class="seven_item_date">November 1, 2024</div>
+                        <span class="seven_item_title">Chip Stock Earns Spot as Top Electronic Component Distributor by Semiconductor Review</span>
+                        <p class="seven_item_text">Chip Stock has been recognized as a top electronic component distributor by Semiconductor Review for our commitment to fast, reliable sourcing.</p>
+                    </div>
+                    <div class="seven_item_link"><svg class="link-arrow" width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 9H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M10 3L16 9L10 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                </a>
+                <a class="seven_item" href="/news">
+                    <div class="seven_item_image"><img src="{{ U }}/2025/06/news-images/ESNA Top 10 Emblem.png" alt="ESNA Top 20"></div>
+                    <div class="seven_tem_content">
+                        <div class="seven_item_date">September 15, 2023</div>
+                        <span class="seven_item_title">Chip Stock Named Top 20 Global Independent Distributor by Electronics Sourcing Magazine</span>
+                        <p class="seven_item_text">Chip Stock has been named one of the Top 20 Global Independent Distributors in Electronics Sourcing North America's 2023 report.</p>
+                    </div>
+                    <div class="seven_item_link"><svg class="link-arrow" width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 9H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M10 3L16 9L10 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                </a>
+            </div>
+            <div class="seven_mob_link seven_link">
+                <a class="link_basic" href="/news">All News
+                    <svg class="link-arrow" width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 9H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M10 3L16 9L10 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    {# ── Bottom CTA ── #}
+    <section class="bottom_section">
+        <div class="bottom_section_wrap">
+            <article class="bottom_section_title white all_text"><h3>Solving shortages. Sourcing smarter. <span class="border">Delivering without compromise.</span></h3></article>
+            <p class="bottom_section_text">We specialize in sourcing end-of-life and hard-to-find components without delays. Trusted by buyers worldwide. Fill out a quick quote request and discover how we deliver better value.</p>
+            <div class="bottom_section_wraper">
+                <a class="main_button_basic button_basic" href="/contact">Request Quote</a>
+            </div>
+        </div>
+    </section>
+
+</main>
+{% endblock %}

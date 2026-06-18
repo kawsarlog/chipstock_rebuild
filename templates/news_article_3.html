@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Chip Stock Named Top 20 Global Independent Distributor by Electronics Sourcing Magazine — Chipstock{% endblock %}
+
+{% block content %}
+{% set U = "/static/uploads" %}
+<main class="single_news_page">
+
+    <section class="breadcrumbs_section">
+        <div class="breadcrumbs_wrap">
+            <div class="breadcrumbs">
+                <span><a href="/">Main</a></span>
+                <span> › </span>
+                <span><a href="/news">news</a></span>
+                <span> › </span>
+                <span><a href="/news">company news</a></span>
+                <span> › </span>
+                <span>chip stock named top 20 global independent distributor</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="article_section">
+        <div class="article_wrap">
+            <h1 class="article_page_title">Article <span style="color:#7d7d80;">page</span></h1>
+            <div class="article_with_sidebar">
+              <div class="article_body">
+                <div class="article_inner">
+                  <div class="article_left">
+                    <div class="article_image">
+                        <img src="{{ U }}/2025/06/news-images/ESNA Top 10 Emblem.png" alt="ESNA Top 20" />
+                    </div>
+                    <div class="article_date">September 15, 2023</div>
+                  </div>
+                  <div class="article_right">
+                    <div class="article_content">
+                        <p><strong>CHARLOTTE, NORTH CAROLINA – September 15, 2023</strong> – Chip Stock, a factory direct electronic component distributor and supply chain solution service, today announced it has been named as one of the Top 20 Global Independent Distributors in Electronics Sourcing North America's 2023 report.</p>
+                        <p>Electronics Sourcing North America (ESNA) annually recognizes independent distributors who demonstrate excellence in sourcing, quality assurance, customer service, and overall supply chain performance. Being named to this prestigious list is a testament to Chip Stock's ongoing commitment to delivering reliable, traceable, and high-quality components to manufacturers across the globe.</p>
+                        <p>"We are honored to be recognized among the top global independent distributors," said Dustin Osborne, President of Chip Stock. "This recognition is a direct result of the dedication our team shows every day — going above and beyond to solve supply chain challenges for our customers, no matter how complex."</p>
+                        <p>As component shortages and supply chain disruptions continue to challenge manufacturers across industries, Chip Stock has positioned itself as a trusted partner for procurement teams seeking fast, reliable access to both standard and hard-to-find electronic components.</p>
+                        <p>Chip Stock's approach combines factory-direct sourcing, a globally connected supplier network, and rigorous quality verification to ensure every part delivered meets or exceeds customer specifications. Their services span shortage sourcing, obsolete and end-of-life component procurement, excess inventory management, and full testing and inspection services.</p>
+                        <p><em>For more information, visit <a href="/">ChipStock.com</a>.</em></p>
+                    </div>
+                    <div class="article_nav">
+                        <a class="article_prev" href="/news/chip-stock-top-electronic-component-distributor-semiconductor-review">
+                            <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="20" fill="#B6F223"/><path d="M27 20H13" stroke="#0B0B0B" stroke-width="1.5" stroke-linecap="round"/><path d="M19 14L13 20L19 26" stroke="#0B0B0B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            PREVIOUS ARTICLE
+                        </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {% include "_article_sidebar.html" %}
+            </div>
+        </div>
+    </section>
+
+</main>
+{% endblock %}

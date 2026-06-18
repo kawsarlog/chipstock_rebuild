@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Thank You — Chipstock{% endblock %}
+
+{% block content %}
+<main class="thankyou-page">
+  <div class="wrap">
+    <div class="thankyou-box">
+      <div class="thankyou-icon">
+        <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+          <circle cx="28" cy="28" r="27" stroke="#B6F223" stroke-width="2"/>
+          <path d="M16 28L24 36L40 20" stroke="#B6F223" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <h1 class="thankyou-title">Request Received!</h1>
+      <p class="thankyou-text">Thank you for your quote request. Our team will review your inquiry and respond within 1 business day with pricing and availability.</p>
+      <div class="thankyou-actions">
+        <a href="/catalog" class="main_button_basic button_basic">Browse More Products</a>
+        <a href="/" class="link_basic" style="margin-left:1.5rem">Back to Home
+          <svg class="link-arrow" width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 9H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M10 3L16 9L10 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</main>
+{% endblock %}

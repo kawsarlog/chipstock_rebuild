@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}News — Chipstock{% endblock %}
+
+{% block content %}
+{% set U = "/static/uploads" %}
+<main class="news_page">
+
+    <section class="breadcrumbs_section">
+        <div class="breadcrumbs_wrap">
+            <div class="breadcrumbs">
+                <span><a href="/">Main</a></span>
+                <span> › </span>
+                <span>news</span>
+                <span> › </span>
+                <span>company news</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="second_section" id="second-section">
+        <div class="second_fon"></div>
+        <div class="second_wrap">
+            <div class="second_top">
+                <article class="second_title black all_text"><h2><span style="color:#7d7d80;">Our</span> news</h2></article>
+                <div class="second_categories">
+                    <a href="/news" class="active">Company news</a>
+                    <a href="/news">Industry News</a>
+                </div>
+            </div>
+            <div class="second_items">
+                <a class="second_item" href="/news/chip-stock-named-2025-top-north-american-independent-distributors">
+                    <div class="second_item_image">
+                        <img src="{{ U }}/2025/06/chip-stock_award-logo-pdf.jpg" alt="Top Distributors 2025" />
+                    </div>
+                    <div class="second_tem_content">
+                        <div class="second_item_date">June 4, 2025</div>
+                        <span class="second_item_title">Chip Stock Named Among the 2025 Top North American Independent Distributors</span>
+                        <div class="second_item_text">CHARLOTTE, NORTH CAROLINA – June 4, 2025 – Chip Stock, a global independent distributor specializing in fast, reliable sourcing of electronic components, has been recognized as one of the top independent electronic component distributors in North America for 2025 by Supply Chain Connect. It's an honor that truly highlights our commitment and hard work in [...]</div>
+                    </div>
+                    <div class="second_item_link">
+                        <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="20" fill="#B6F223"/><path d="M13 20H27" stroke="#0B0B0B" stroke-width="1.5" stroke-linecap="round"/><path d="M21 14L27 20L21 26" stroke="#0B0B0B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                </a>
+                <a class="second_item" href="/news/chip-stock-top-electronic-component-distributor-semiconductor-review">
+                    <div class="second_item_image">
+                        <img src="{{ U }}/2025/06/news-images/Top-Distributors-2023.png" alt="Top Electronic Component Distributor" />
+                    </div>
+                    <div class="second_tem_content">
+                        <div class="second_item_date">November 1, 2024</div>
+                        <span class="second_item_title">Chip Stock Earns Spot as Top Electronic Component Distributor by Semiconductor Review</span>
+                        <div class="second_item_text">In response to the global surge in e-commerce, expectations for B2B supply chains have shifted drastically. Clients now anticipate the same level of ease and efficiency they enjoy in B2C online shopping experiences. With many adopting a 'just in time' buying strategy — expedited delivery has become more essential than ever. Chip [...]</div>
+                    </div>
+                    <div class="second_item_link">
+                        <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="20" fill="#B6F223"/><path d="M13 20H27" stroke="#0B0B0B" stroke-width="1.5" stroke-linecap="round"/><path d="M21 14L27 20L21 26" stroke="#0B0B0B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                </a>
+                <a class="second_item" href="/news/chip-stock-named-top-20-global-independent-distributor-electronics-sourcing">
+                    <div class="second_item_image">
+                        <img src="{{ U }}/2025/06/news-images/ESNA Top 10 Emblem.png" alt="ESNA Top 20" />
+                    </div>
+                    <div class="second_tem_content">
+                        <div class="second_item_date">September 15, 2023</div>
+                        <span class="second_item_title">Chip Stock Named Top 20 Global Independent Distributor by Electronics Sourcing Magazine</span>
+                        <div class="second_item_text">CHARLOTTE, NORTH CAROLINA – September 15, 2023 – Chip Stock, a factory direct electronic component distributor and supply chain solution service, today announced it has been named as one of the Top 20 Global Independent Distributors in Electronics Sourcing North America's 2023 report. [...]</div>
+                    </div>
+                    <div class="second_item_link">
+                        <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="20" fill="#B6F223"/><path d="M13 20H27" stroke="#0B0B0B" stroke-width="1.5" stroke-linecap="round"/><path d="M21 14L27 20L21 26" stroke="#0B0B0B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                </a>
+            </div>
+            <div class="second_pagination">
+                <span class="page-numbers current">1</span>
+                <a class="page-numbers" href="#">2</a>
+                <a class="page-numbers next" href="#">
+                    <svg width="13" height="8" viewBox="0 0 13 8" fill="none"><path d="M1 4H12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M9 1L12 4L9 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </a>
+            </div>
+        </div>
+    </section>
+
+</main>
+{% endblock %}

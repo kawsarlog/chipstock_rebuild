@@ -1,0 +1,585 @@
+"""
+Chipstock main website — marketing pages + vyrian_db product catalog.
+
+Run: python app.py
+DB:  vyrian_db @ localhost:5432 (postgres / no password) — public.products table
+"""
+from __future__ import annotations
+
+import base64
+import html as _html
+import json
+import math
+import os
+import re
+import urllib.error
+import urllib.request
+from email.utils import parseaddr
+from typing import Any, Dict, List, Optional, Tuple
+from urllib.parse import urlparse
+
+import psycopg2
+from flask import (
+    Flask, Response, abort, flash, jsonify, redirect,
+    render_template, request, url_for,
+)
+
+app = Flask(__name__)
+app.secret_key = os.getenv("SECRET_KEY", "chipstock-v2-secret")
+
+# ── Catalog DB ───────────────────────────────────────────────────────────────
+_DB = dict(
+    host=os.getenv("PGHOST", "localhost"),
+    dbname=os.getenv("PGDATABASE", "vyrian_db"),
+    user=os.getenv("PGUSER", "postgres"),
+    password=os.getenv("PGPASSWORD", ""),
+    connect_timeout=10,
+)
+
+PER_PAGE = 24
+SEARCH_MAX = 120
+
+SORT_KEYS = {"name_asc", "name_desc", "mfr_asc"}
+_ORDER: Dict[str, str] = {
+    "name_asc":  "LOWER(COALESCE(description,'')) ASC  NULLS LAST, product_id",
+    "name_desc": "LOWER(COALESCE(description,'')) DESC NULLS LAST, product_id",
+    "mfr_asc":   "LOWER(COALESCE(manufacturer,'')) ASC NULLS LAST, product_id",
+}
+
+# (key, label, db_column_or_None, db_value_or_None)
+CATEGORY_OPTIONS: List[Tuple[str, str, Optional[str], Optional[str]]] = [
+    ("ALL",           "All Products",    None,       None),
+    ("SEMICONDUCTORS","Semiconductors",  "source",   "vyrian"),
+    ("HARD_DRIVES",   "Hard Drives",     "category", "HARD_DRIVES"),
+    ("SSD",           "SSD",             "category", "SSD"),
+    ("PROCESSORS",    "Processors",      "category", "PROCESSORS"),
+    ("MEMORY",        "Memory",          "category", "MEMORY"),
+]
+
+# Readable labels for semiconductor IC sub-categories (vyrian lowercase category values)
+SUBCAT_LABELS: Dict[str, str] = {
+    "memory-ics":                    "Memory ICs",
+    "programmable-ics":              "Programmable ICs",
+    "transistors":                   "Transistors",
+    "diodes":                        "Diodes",
+    "logic-ics":                     "Logic ICs",
+    "peripheral-ics":                "Peripheral ICs",
+    "interface-ics":                 "Interface ICs",
+    "amplifiers":                    "Amplifiers",
+    "regulators":                    "Regulators",
+    "capacitors":                    "Capacitors",
+    "converters":                    "Converters",
+    "optoelectronics":               "Optoelectronics",
+    "resistors":                     "Resistors",
+    "connectors":                    "Connectors",
+    "inductors":                     "Inductors",
+    "telecommunications":            "Telecom ICs",
+    "sensors-transducers":           "Sensors & Transducers",
+    "general-purpose-ics":           "General Purpose ICs",
+    "filters":                       "Filters",
+    "rf-microwave":                  "RF / Microwave",
+    "triggering-devices":            "Triggering Devices",
+    "relays":                        "Relays",
+    "transformers":                  "Transformers",
+    "storage-drives":                "Storage Drives",
+    "other-function-semiconductors": "Other Semiconductors",
+}
+
+
+def _conn():
+    c = psycopg2.connect(**_DB)
+    c.autocommit = False
+    return c
+
+
+def _norm(s: str) -> str:
+    return re.sub(r"[^a-z0-9]", "", (s or "").lower())[:SEARCH_MAX]
+
+
+def _cat_clause(cat_key: str) -> Tuple[str, List[Any]]:
+    for k, _lbl, col, val in CATEGORY_OPTIONS:
+        if k == cat_key:
+            return (f"{col} = %s", [val]) if col else ("1=1", [])
+    return ("1=1", [])
+
+
+def fetch_catalog_page(
+    cat_key: str, page: int, sort: str,
+    mfr: Optional[str] = None, q: Optional[str] = None, subcat: Optional[str] = None,
+) -> Tuple[List[Dict], int]:
+    order = _ORDER.get(sort, _ORDER["name_asc"])
+    cat_cond, params = _cat_clause(cat_key)
+    clauses: List[str] = ([cat_cond] if cat_cond != "1=1" else [])
+
+    if subcat:
+        clauses.append("category = %s")
+        params.append(subcat)
+
+    if mfr:
+        clauses.append("LOWER(TRIM(COALESCE(manufacturer,'')))=LOWER(TRIM(%s))")
+        params.append(mfr)
+
+    nq = _norm(q or "")
+    if nq:
+        norm_expr = "regexp_replace(lower(COALESCE({c},'')), '[^a-z0-9]', '', 'g')"
+        search_cols = ["product_id", "manufacturer", "description"]
+        clauses.append(
+            "(" + " OR ".join(
+                f"({norm_expr.format(c=c)} LIKE %s)" for c in search_cols
+            ) + ")"
+        )
+        params += [f"%{nq}%"] * len(search_cols)
+
+    where = " AND ".join(clauses) if clauses else "1=1"
+    offset = (page - 1) * PER_PAGE
+
+    db = _conn()
+    try:
+        with db.cursor() as cur:
+            cur.execute(f"SELECT count(*) FROM public.products WHERE {where}", params)
+            total = int(cur.fetchone()[0])
+            cur.execute(
+                f"""SELECT product_id, manufacturer, description, image_url,
+                           category, subcategory, source
+                    FROM public.products WHERE {where}
+                    ORDER BY {order} LIMIT %s OFFSET %s""",
+                params + [PER_PAGE, offset],
+            )
+            cols = [d[0] for d in cur.description]
+            rows = [dict(zip(cols, r)) for r in cur.fetchall()]
+        db.commit()
+        return rows, total
+    except Exception:
+        db.rollback()
+        raise
+    finally:
+        db.close()
+
+
+def fetch_subcats(cat_key: str) -> List[Tuple[str, str]]:
+    """Return [(db_val, label)] for component-type dropdown (semiconductors only)."""
+    if cat_key not in ("ALL", "SEMICONDUCTORS"):
+        return []
+    extra = "source = 'vyrian' AND " if cat_key == "SEMICONDUCTORS" else ""
+    db = _conn()
+    try:
+        with db.cursor() as cur:
+            cur.execute(
+                f"SELECT category, count(*) FROM public.products "
+                f"WHERE {extra}category IS NOT NULL "
+                f"AND category = lower(category) "
+                f"GROUP BY category HAVING count(*) > 50 ORDER BY count(*) DESC"
+            )
+            return [
+                (r[0], SUBCAT_LABELS.get(r[0], r[0].replace("-", " ").title()))
+                for r in cur.fetchall()
+            ]
+    finally:
+        db.close()
+
+
+def fetch_manufacturers(cat_key: str, subcat: Optional[str] = None) -> List[str]:
+    cat_cond, params = _cat_clause(cat_key)
+    clauses = [f"({cat_cond})"] if cat_cond != "1=1" else []
+    if subcat:
+        clauses.append("category = %s")
+        params.append(subcat)
+    clauses.append("TRIM(COALESCE(manufacturer,''))<>''")
+    where = " AND ".join(clauses)
+    db = _conn()
+    try:
+        with db.cursor() as cur:
+            cur.execute(
+                f"SELECT TRIM(manufacturer) AS m, count(*) FROM public.products "
+                f"WHERE {where} GROUP BY TRIM(manufacturer) ORDER BY count(*) DESC LIMIT 300",
+                params,
+            )
+            return [r[0] for r in cur.fetchall() if r[0]]
+    finally:
+        db.close()
+
+
+def fetch_related(pid: str, manufacturer: Optional[str], category: Optional[str], source: Optional[str] = None, limit: int = 5) -> List[Dict]:
+    """Fetch similar products: same category → same manufacturer → same source (random fallback)."""
+    COLS = "product_id, manufacturer, description, image_url, category"
+    db = _conn()
+    try:
+        with db.cursor() as cur:
+            results: list = []
+
+            # 1) Same category, manufacturer priority
+            if category:
+                cur.execute(
+                    f"""SELECT {COLS} FROM public.products
+                        WHERE product_id <> %s AND category = %s
+                        ORDER BY (LOWER(COALESCE(manufacturer,''))=LOWER(COALESCE(%s,''))) DESC, RANDOM()
+                        LIMIT %s""",
+                    (pid, category, manufacturer or "", limit),
+                )
+                results = list(cur.fetchall())
+
+            # 2) Same manufacturer, any category
+            if len(results) < limit and manufacturer:
+                seen = [r[0] for r in results] or ["__none__"]
+                cur.execute(
+                    f"""SELECT {COLS} FROM public.products
+                        WHERE product_id <> %s
+                          AND LOWER(TRIM(COALESCE(manufacturer,''))) = LOWER(TRIM(%s))
+                          AND product_id <> ALL(%s)
+                        ORDER BY RANDOM()
+                        LIMIT %s""",
+                    (pid, manufacturer, seen, limit - len(results)),
+                )
+                results += list(cur.fetchall())
+
+            # 3) Same source, random — always fills to `limit`
+            if len(results) < limit:
+                seen = [r[0] for r in results] or ["__none__"]
+                src_cond = "AND source = %s" if source else ""
+                src_val  = [source] if source else []
+                cur.execute(
+                    f"""SELECT {COLS} FROM public.products
+                        WHERE product_id <> %s
+                          AND product_id <> ALL(%s)
+                          AND image_url IS NOT NULL
+                          {src_cond}
+                        ORDER BY RANDOM()
+                        LIMIT %s""",
+                    [pid, seen] + src_val + [limit - len(results)],
+                )
+                results += list(cur.fetchall())
+
+            cols = [d[0] for d in cur.description]
+            return [dict(zip(cols, r)) for r in results[:limit]]
+    except Exception:
+        return []
+    finally:
+        db.close()
+
+
+def fetch_product(pid: str) -> Optional[Dict]:
+    db = _conn()
+    try:
+        with db.cursor() as cur:
+            cur.execute(
+                """SELECT product_id, manufacturer, description, image_url,
+                          specs_html, category, subcategory, source, updated_at
+                   FROM public.products WHERE product_id = %s""",
+                (pid,),
+            )
+            cols = [d[0] for d in cur.description]
+            row = cur.fetchone()
+            return dict(zip(cols, row)) if row else None
+    finally:
+        db.close()
+
+
+def _page_nums(cur: int, total: int) -> List:
+    if total <= 1:
+        return [1]
+    if total <= 12:
+        return list(range(1, total + 1))
+    want = {1, total, cur, cur - 1, cur + 1, cur - 2, cur + 2}
+    nums = sorted(p for p in want if 1 <= p <= total)
+    out: List = []
+    last = None
+    for p in nums:
+        if last and p > last + 1:
+            out.append("…")
+        out.append(p)
+        last = p
+    return out
+
+
+# ── Brevo email ──────────────────────────────────────────────────────────────
+def _valid_email(v: str) -> bool:
+    _, addr = parseaddr((v or "").strip())
+    if not addr or "@" not in addr or addr.count("@") != 1:
+        return False
+    local, domain = addr.rsplit("@", 1)
+    return bool(local and domain and "." in domain and " " not in addr)
+
+
+def _send_brevo(payload: Dict[str, str]) -> Tuple[bool, str]:
+    api_key = (os.getenv("BREVO_API_KEY") or "").strip()
+    if not api_key:
+        return False, "Brevo API key not configured."
+    sender = os.getenv("RFQ_FROM_EMAIL", "updates.from.kawsar@gmail.com")
+    recipient = os.getenv("RFQ_TO_EMAIL", "rfq@chip-stock.com")
+    esc = _html.escape
+    msg_html = esc(payload["message"]).replace("\n", "<br>")
+    html_body = f"""<html><body style="background:#0B0B0B;font-family:sans-serif;color:#f4f4f4;padding:24px;">
+<table style="max-width:600px;width:100%">
+<tr><td colspan="2" style="padding-bottom:16px">
+  <h2 style="color:#B6F223;margin:0">New RFQ — Chipstock</h2></td></tr>
+<tr><td style="color:#999;padding:6px 12px 6px 0">Name</td><td><b>{esc(payload['name'])}</b></td></tr>
+<tr><td style="color:#999;padding:6px 12px 6px 0">Phone</td><td><b>{esc(payload['phone'])}</b></td></tr>
+<tr><td style="color:#999;padding:6px 12px 6px 0">Email</td><td><b>{esc(payload['email'])}</b></td></tr>
+<tr><td style="color:#999;padding:6px 12px 6px 0">Quantity</td><td><b>{esc(payload['quantity'])}</b></td></tr>
+<tr><td style="color:#999;padding:6px 12px 6px 0">Part Number</td><td><b>{esc(payload.get('part_number') or '—')}</b></td></tr>
+<tr><td style="color:#999;padding:6px 12px 6px 0">Product</td><td><b>{esc(payload.get('product_name') or '—')}</b></td></tr>
+<tr><td style="color:#999;padding:6px 12px 6px 0">Page</td>
+    <td><a href="{esc(payload.get('page_url',''))}" style="color:#B6F223">{esc(payload.get('page_url','—'))}</a></td></tr>
+</table>
+<div style="margin-top:16px;padding:12px;border:1px solid #333;background:#111">
+  <div style="color:#B6F223;font-size:12px;text-transform:uppercase;margin-bottom:8px">Message</div>
+  <div style="color:#eee;line-height:1.65">{msg_html}</div>
+</div>
+</body></html>"""
+    body = {
+        "sender":     {"name": "Chipstock", "email": sender},
+        "to":         [{"email": recipient, "name": "Sales Team"}],
+        "subject":    f"RFQ: {payload.get('product_name') or payload['name']}",
+        "replyTo":    {"email": payload["email"], "name": payload["name"]},
+        "htmlContent": html_body,
+    }
+    req = urllib.request.Request(
+        "https://api.brevo.com/v3/smtp/email",
+        data=json.dumps(body).encode(),
+        method="POST",
+        headers={
+            "accept": "application/json",
+            "Content-Type": "application/json",
+            "api-key": api_key,
+        },
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            return (200 <= resp.status < 300), ""
+    except urllib.error.HTTPError as e:
+        try:
+            d = json.loads(e.read().decode())
+            msg = str(d.get("message") or "")
+        except Exception:
+            msg = ""
+        return False, f"Brevo {e.code}: {msg}"
+    except Exception as e:
+        return False, str(e)
+
+
+# ── Marketing routes ─────────────────────────────────────────────────────────
+@app.route("/")
+def index():
+    return render_template("index.html")
+
+
+@app.route("/about")
+def about():
+    return render_template("about.html")
+
+
+@app.route("/products")
+def products():
+    return render_template("products.html")
+
+
+@app.route("/quality")
+def quality():
+    return render_template("quality.html")
+
+
+@app.route("/services")
+def services():
+    return render_template("services.html")
+
+
+@app.route("/services/excess-inventory-management")
+def excess():
+    return render_template("excess.html")
+
+
+@app.route("/news")
+def news():
+    return render_template("news.html")
+
+
+@app.route("/news/chip-stock-named-2025-top-north-american-independent-distributors")
+def news_article_1():
+    return render_template("news_article_1.html")
+
+
+@app.route("/news/chip-stock-top-electronic-component-distributor-semiconductor-review")
+def news_article_2():
+    return render_template("news_article_2.html")
+
+
+@app.route("/news/chip-stock-named-top-20-global-independent-distributor-electronics-sourcing")
+def news_article_3():
+    return render_template("news_article_3.html")
+
+
+@app.route("/contact")
+def contact():
+    return render_template("contact.html")
+
+
+@app.route("/contact/submit", methods=["POST"])
+def contact_submit():
+    flash("Thank you! We will get back to you shortly.", "success")
+    return redirect(url_for("contact"))
+
+
+@app.route("/excess/submit", methods=["POST"])
+def excess_submit():
+    flash("Thank you! We will review your inventory list and get back to you shortly.", "success")
+    return redirect(url_for("excess"))
+
+
+# ── Image proxy (serversupply.com) ───────────────────────────────────────────
+def _img_b64enc(s: str) -> str:
+    return base64.urlsafe_b64encode(s.encode()).decode().rstrip("=")
+
+def _img_b64dec(s: str) -> str:
+    pad = "=" * (-len(s) % 4)
+    return base64.urlsafe_b64decode(s + pad).decode()
+
+@app.route("/catalog-img/<token>")
+def catalog_image_proxy(token: str) -> Response:
+    try:
+        url = _img_b64dec(token).strip()
+    except Exception:
+        abort(404)
+    if not url.startswith(("http://", "https://")):
+        abort(404)
+    host = (urlparse(url).netloc or "").lower().split(":")[0]
+    if not (host == "serversupply.com" or host.endswith(".serversupply.com")):
+        abort(403)
+    try:
+        req = urllib.request.Request(
+            url, headers={"User-Agent": "Mozilla/5.0 (compatible; ChipstockCatalog/1.1)"}
+        )
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            ct = (resp.headers.get("Content-Type") or "image/jpeg").split(";")[0].strip()
+            data = resp.read()
+    except Exception:
+        abort(502)
+    r = Response(data, mimetype=ct if ct.startswith("image/") else "image/jpeg")
+    r.headers["Cache-Control"] = "public, max-age=604800"
+    return r
+
+@app.template_filter("proxy_img")
+def proxy_img_filter(url: Optional[str]) -> str:
+    """Wrap serversupply.com image URLs through the local proxy."""
+    if not url:
+        return ""
+    host = (urlparse(url).netloc or "").lower().split(":")[0]
+    if not (host == "serversupply.com" or host.endswith(".serversupply.com")):
+        return url
+    return url_for("catalog_image_proxy", token=_img_b64enc(url))
+
+
+# ── Catalog routes ────────────────────────────────────────────────────────────
+@app.route("/catalog")
+def catalog():
+    q = request.args.get("q", "").strip()[:SEARCH_MAX]
+    cat_key = request.args.get("cat", "ALL").strip().upper()
+    if not any(k == cat_key for k, *_ in CATEGORY_OPTIONS):
+        cat_key = "ALL"
+    sort = request.args.get("sort", "name_asc")
+    if sort not in SORT_KEYS:
+        sort = "name_asc"
+    try:
+        page = max(1, int(request.args.get("page", 1)))
+    except (ValueError, TypeError):
+        page = 1
+
+    # Sub-category filter (IC type — only for SEMICONDUCTORS / ALL tabs)
+    available_subcats = fetch_subcats(cat_key)
+    subcat_raw = request.args.get("subcat", "").strip()
+    subcat = subcat_raw if any(k == subcat_raw for k, _ in available_subcats) else ""
+
+    mfr_raw = request.args.get("mfr", "").strip()
+    mfrs = fetch_manufacturers(cat_key, subcat or None)
+    mfr_f = mfr_raw if any(m.lower() == mfr_raw.lower() for m in mfrs) else None
+
+    rows, total = fetch_catalog_page(cat_key, page, sort, mfr=mfr_f, q=q or None, subcat=subcat or None)
+    total_pages = max(1, math.ceil(total / PER_PAGE)) if total else 1
+    if page > total_pages:
+        page = total_pages
+
+    cat_label = next((lbl for k, lbl, *_ in CATEGORY_OPTIONS if k == cat_key), "All Products")
+
+    return render_template(
+        "catalog.html",
+        rows=rows, total=total, page=page, total_pages=total_pages,
+        showing_from=(page - 1) * PER_PAGE + 1 if total else 0,
+        showing_to=min(page * PER_PAGE, total),
+        page_numbers=_page_nums(page, total_pages),
+        cat_key=cat_key, cat_label=cat_label, sort=sort, q=q,
+        manufacturers=mfrs, mfr_filter=mfr_f or "",
+        category_options=CATEGORY_OPTIONS,
+        available_subcats=available_subcats, subcat=subcat,
+    )
+
+
+@app.route("/catalog/<path:product_id>")
+def catalog_detail(product_id: str):
+    product = fetch_product(product_id)
+    if not product:
+        abort(404)
+    related = fetch_related(
+        product_id,
+        product.get("manufacturer"),
+        product.get("category"),
+        source=product.get("source"),
+    )
+    return render_template("catalog_detail.html", product=product, related=related)
+
+
+@app.route("/api/search")
+def api_search():
+    q = request.args.get("q", "").strip()[:80]
+    nq = _norm(q)
+    if not nq:
+        return jsonify([])
+    db = _conn()
+    try:
+        with db.cursor() as cur:
+            cur.execute(
+                """SELECT product_id, manufacturer, description
+                   FROM public.products
+                   WHERE regexp_replace(lower(COALESCE(product_id,'')), '[^a-z0-9]', '', 'g') LIKE %s
+                      OR regexp_replace(lower(COALESCE(description,'')), '[^a-z0-9]', '', 'g') LIKE %s
+                   LIMIT 8""",
+                [f"%{nq}%"] * 2,
+            )
+            return jsonify([
+                {"pid": r[0], "mfr": r[1] or "", "desc": (r[2] or "")[:70]}
+                for r in cur.fetchall()
+            ])
+    except Exception:
+        return jsonify([])
+    finally:
+        db.close()
+
+
+@app.route("/api/request-quote", methods=["POST"])
+def request_quote():
+    data = request.get_json(silent=True) or {}
+    fields = {
+        k: str(data.get(k) or "").strip()
+        for k in ("name", "phone", "email", "quantity", "part_number",
+                  "message", "product_name", "page_url")
+    }
+    missing = [k for k in ("name", "phone", "email", "quantity", "message") if not fields[k]]
+    if missing:
+        return jsonify({"ok": False, "error": "Please fill in all required fields."}), 400
+    if not _valid_email(fields["email"]):
+        return jsonify({"ok": False, "error": "Please provide a valid email address."}), 400
+    if len(fields["message"]) > 5000:
+        return jsonify({"ok": False, "error": "Message is too long."}), 400
+    ok, err = _send_brevo(fields)
+    if not ok:
+        return jsonify({"ok": False, "error": err or "Failed to send."}), 500
+    return jsonify({"ok": True})
+
+
+@app.route("/thank-you")
+def thank_you():
+    return render_template("thank_you.html")
+
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", os.environ.get("FLASK_PORT", 5001)))
+    debug = os.environ.get("FLASK_DEBUG", "").lower() in ("1", "true", "yes")
+    app.run(host="0.0.0.0", port=port, debug=debug)

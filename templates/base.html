@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Chipstock{% endblock %}</title>
+    <link rel="profile" href="https://gmpg.org/xfn/11">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/owl.carousel.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/remodal.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/remodal-default-theme.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/select2.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/chipstock.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/catalog.css') }}">
+
+    {% block extra_head %}{% endblock %}
+    <!-- jQuery loaded early so inline content scripts can use $ -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+
+<body>
+<div id="page" class="site">
+
+    <header id="masthead" class="site-header">
+        <div class="header_wrap">
+            <div class="header_logo">
+                <a href="/"><img src="/static/uploads/2025/05/logo.webp" alt="Chipstock"></a>
+                <button type="button" class="btn_open" id="cs-header-open" aria-label="Open menu" aria-expanded="false" aria-controls="cs-header-menu">
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <rect x="0.5" y="0.5" width="39" height="39" rx="19.5" stroke="#323233"></rect>
+                        <path d="M12.5 25.27C12.358 25.27 12.2393 25.2216 12.144 25.125C12.0487 25.0283 12.0007 24.9093 12 24.768C11.9993 24.6266 12.0473 24.508 12.144 24.412C12.2407 24.316 12.3593 24.2683 12.5 24.269H27.5C27.642 24.269 27.7607 24.317 27.856 24.413C27.952 24.509 28 24.628 28 24.77C28 24.912 27.952 25.0306 27.856 25.126C27.76 25.2213 27.6413 25.269 27.5 25.269L12.5 25.27ZM12.5 20.5C12.358 20.5 12.2393 20.452 12.144 20.356C12.0487 20.26 12.0007 20.141 12 19.999C11.9993 19.857 12.0473 19.7383 12.144 19.643C12.2407 19.5476 12.3593 19.5 12.5 19.5H27.5C27.642 19.5 27.7607 19.548 27.856 19.644C27.9513 19.74 27.9993 19.859 28 20.001C28.0007 20.143 27.9527 20.2616 27.856 20.357C27.7593 20.4523 27.6407 20.5 27.5 20.5H12.5ZM12.5 15.73C12.358 15.73 12.2393 15.6823 12.144 15.587C12.048 15.491 12 15.372 12 15.23C12 15.088 12.048 14.9693 12.144 14.874C12.24 14.7786 12.3587 14.731 12.5 14.731H27.5C27.642 14.731 27.7607 14.779 27.856 14.875C27.9513 14.971 27.9993 15.0893 28 15.23C28.0007 15.3706 27.9527 15.4893 27.856 15.586C27.7593 15.6826 27.6407 15.7306 27.5 15.73H12.5Z" fill="#F5F5FA"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="header_menu" id="cs-header-menu" aria-hidden="false">
+                <button type="button" class="btn_close" id="cs-header-close" aria-label="Close menu">
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <rect x="0.5" y="0.5" width="39" height="39" rx="19.5" stroke="#323233"></rect>
+                        <path d="M20 20.708L14.754 25.954C14.6607 26.0473 14.546 26.0973 14.41 26.104C14.274 26.1107 14.1527 26.0607 14.046 25.954C13.9393 25.8473 13.886 25.7293 13.886 25.6C13.886 25.4707 13.9393 25.3527 14.046 25.246L19.292 20L14.046 14.754C13.9527 14.6607 13.9027 14.546 13.896 14.41C13.8893 14.274 13.9393 14.1527 14.046 14.046C14.1527 13.9393 14.2707 13.886 14.4 13.886C14.5293 13.886 14.6473 13.9393 14.754 14.046L20 19.292L25.246 14.046C25.3393 13.9527 25.4543 13.9027 25.591 13.896C25.7263 13.8893 25.8473 13.9393 25.954 14.046C26.0607 14.1527 26.114 14.2707 26.114 14.4C26.114 14.5293 26.0607 14.6473 25.954 14.754L20.708 20L25.954 25.246C26.0473 25.3393 26.0973 25.4543 26.104 25.591C26.1107 25.7263 26.0607 25.8473 25.954 25.954C25.8473 26.0607 25.7293 26.114 25.6 26.114C25.4707 26.114 25.3527 26.0607 25.246 25.954L20 20.708Z" fill="#F5F5FA"></path>
+                    </svg>
+                </button>
+                <nav class="header_nav" aria-label="Primary">
+                    <ul>
+                        <li><a href="/services"><span class="nav-num">01 /</span> Our Services</a></li>
+                        <li><a href="/about"><span class="nav-num">02 /</span> About us</a></li>
+                        <li><a href="/quality"><span class="nav-num">03 /</span> Quality</a></li>
+                        <li><a href="/products"><span class="nav-num">04 /</span> Products</a></li>
+                        <li><a href="/catalog"{% if request.path.startswith('/catalog') %} style="color:var(--cs-accent)"{% endif %}><span class="nav-num">05 /</span> Catalog</a></li>
+                        <li><a href="/news"><span class="nav-num">06 /</span> News</a></li>
+                        <li><a href="/contact"><span class="nav-num">07 /</span> Contact</a></li>
+                        <li><a href="/services/excess-inventory-management"><span class="nav-num">08 /</span> Excess Inventory Management</a></li>
+                    </ul>
+                </nav>
+                <div class="header_mob_link">
+                    <a class="main_button_basic button_basic" href="#" data-open-quote-modal><span class="button_basic_label">Request Quote</span></a>
+                </div>
+            </div>
+            <div class="header_link">
+                <a class="main_button_basic button_basic" href="#" data-open-quote-modal><span class="button_basic_label">Request Quote</span></a>
+            </div>
+        </div>
+    </header>
+    <div id="cs-header-backdrop" class="header_backdrop" aria-hidden="true"></div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flash-messages" style="padding: 1rem 2rem; background: #B6F223; color: #0B0B0B;">
+        {% for category, message in messages %}
+        <p>{{ message }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+
+    <footer id="colophon" class="site-footer">
+        <div class="footer_wrap">
+            <div class="footer_left">
+                <div class="footer_logo">
+                    <a href="/"><img src="/static/uploads/2025/05/logo.webp" alt="Chipstock" /></a>
+                </div>
+                <div class="footer_copyright">
+                    <p>© 2025 Chip-Stock.com. All rights reserved.</p>
+                </div>
+            </div>
+            <div class="footer_right">
+                <div class="footer_menu">
+                    <nav class="footer_nav">
+                        <ul>
+                            <li><a href="/services"><span class="nav-num">01 /</span> Our Services</a></li>
+                            <li><a href="/about"><span class="nav-num">02 /</span> About us</a></li>
+                            <li><a href="/quality"><span class="nav-num">03 /</span> Quality</a></li>
+                            <li><a href="/products"><span class="nav-num">04 /</span> Products</a></li>
+                            <li><a href="/catalog"><span class="nav-num">05 /</span> Catalog</a></li>
+                            <li><a href="/news"><span class="nav-num">06 /</span> News</a></li>
+                            <li><a href="/contact"><span class="nav-num">07 /</span> Contact</a></li>
+                            <li><a href="/services/excess-inventory-management"><span class="nav-num">08 /</span> Excess Inventory Management</a></li>
+                        </ul>
+                    </nav>
+                </div>
+                <div class="footer_wrapper">
+                    <div class="footer_contacts">
+                        <div class="footer_tel">
+                            <a href="tel:+17046725151">(704)-672-5151</a>
+                        </div>
+                        <div class="footer_email">
+                            <a href="mailto:info@chip-stock.com">info@chip-stock.com</a>
+                        </div>
+                        <p>201 W Morehead St, Charlotte, NC 28202</p>
+                    </div>
+                    <div class="footer_link">
+                        <a class="button_basic" href="/contact">Request Quote</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer_mob_copyright">
+                <p>© 2025 Chip-Stock.com. All rights reserved.</p>
+            </div>
+        </div>
+    </footer><!-- #colophon -->
+
+    <!-- Contact Modal -->
+    <div class="remodal-contact">
+        <div class="remodal" data-remodal-id="modal-contact">
+            <button data-remodal-action="close" class="remodal-close"></button>
+            <div class="modal-wrap">
+                <div>
+                    <img src="/static/uploads/2025/05/logo.webp" alt="logo">
+                </div>
+                <h2 class="form_contact_right_title">Request a Quote</h2>
+                <p class="form_contact_right_subtitle" style="color:white; margin-top: -0.7rem;">
+                    Complete the form and our team will respond quickly with pricing and availability
+                </p>
+                <div class="form-wrap">
+                    <form class="wpcf7-form" method="post" action="/contact/submit">
+                        <p><input type="text" name="name" placeholder="Your Name" required></p>
+                        <p><input type="email" name="email" placeholder="Email" required></p>
+                        <p><input type="text" name="phone" placeholder="Phone"></p>
+                        <p><textarea name="message" placeholder="Your message" rows="4"></textarea></p>
+                        <p><button type="submit" class="wpcf7-submit">Send</button></p>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RFQ Modal -->
+    <div class="remodal-contact">
+        <div class="remodal remodal_rfq" data-remodal-id="modal-contact-rfq">
+            <button data-remodal-action="close" class="remodal-close"></button>
+            <div class="modal-wrap">
+                <h2 class="form_contact_right_title">Request a Quote</h2>
+                <div class="form-wrap">
+                    <form class="wpcf7-form" method="post" action="/contact/submit">
+                        <p><input type="text" name="name" placeholder="Your Name" required></p>
+                        <p><input type="email" name="email" placeholder="Email" required></p>
+                        <p><input type="text" name="phone" placeholder="Phone"></p>
+                        <p><input type="text" name="part_number" placeholder="Part Number / PN"></p>
+                        <p><input type="text" name="quantity" placeholder="Quantity"></p>
+                        <p><textarea name="message" placeholder="Additional details" rows="3"></textarea></p>
+                        <p><button type="submit" class="wpcf7-submit">Send RFQ</button></p>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div><!-- #page -->
+
+<!-- AJAX Quote Modal -->
+<div class="cs-quote-modal" id="cs-quote-modal" aria-hidden="true">
+    <div class="cs-quote-overlay" data-close-quote-modal></div>
+    <div class="cs-quote-dialog" role="dialog" aria-modal="true" aria-labelledby="cs-quote-title">
+        <button type="button" class="cs-quote-close" data-close-quote-modal aria-label="Close">&times;</button>
+        <h2 id="cs-quote-title">Request a Quote</h2>
+        <p class="cs-quote-subtitle">Complete the form and our team will respond quickly with pricing and availability.</p>
+        <form id="cs-quote-form" novalidate>
+            <input type="text"   class="cs-input" name="name"        placeholder="Your Name*"           required maxlength="150">
+            <input type="text"   class="cs-input" name="phone"       placeholder="Phone number*"        required maxlength="80">
+            <input type="email"  class="cs-input" name="email"       placeholder="Email*"               required maxlength="190">
+            <input type="text"   class="cs-input" name="quantity"    placeholder="Quantity*"            required maxlength="80">
+            <input type="text"   class="cs-input" name="part_number" placeholder="Part Number (optional)"        maxlength="190">
+            <textarea            class="cs-input cs-quote-message" name="message" placeholder="Message*" required maxlength="5000"></textarea>
+            <input type="hidden" name="product_name" value="">
+            <input type="hidden" name="page_url"     value="">
+            <button type="submit" class="cs-btn">Submit</button>
+            <p class="cs-quote-status" id="cs-quote-status" role="status" aria-live="polite"></p>
+        </form>
+        <p class="cs-quote-direct">Or reach out directly: <a href="mailto:rfq@chip-stock.com">rfq@chip-stock.com</a></p>
+    </div>
+</div>
+
+<!-- JS -->
+<script src="{{ url_for('static', filename='js/navigation.js') }}"></script>
+<script src="{{ url_for('static', filename='js/remodal.js') }}"></script>
+<script src="{{ url_for('static', filename='js/owl.carousel.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/select2.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/mixitup.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<script src="{{ url_for('static', filename='js/site_header.js') }}" defer></script>
+<script src="{{ url_for('static', filename='js/request_quote.js') }}" defer></script>
+
+{% block extra_js %}{% endblock %}
+
+</body>
+</html>

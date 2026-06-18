@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% block title %}Products — Chipstock{% endblock %}
+
+{% block content %}
+{% set U = "/static/uploads" %}
+<main class="poducts_page">
+
+    <section class="second_section" id="second-section">
+        <div class="second_wrap">
+            <article class="second_title black all_text">Our Product Brands</article>
+
+            {% set alphabet = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'] %}
+            {% set active_letters = ['A','B','C','D','E','F','G','H','I','K','L','M','N','O','P','R','S','T','V','X','Y','Z'] %}
+
+            <div class="filters-block">
+                {% for letter in alphabet %}
+                {% set is_active = letter in active_letters %}
+                <button class="filter-letter-item {{ '' if is_active else 'not-active' }}"
+                        data-letter="{{ letter }}"
+                        {{ '' if is_active else 'disabled' }}>{{ letter }}</button>
+                {% endfor %}
+            </div>
+
+            <div id="selected-letter-output" class="letter-output"></div>
+
+            <div class="letters-list mixit_active" id="mixit_active">
+                <div class="project_hero_image mix" data-letter="A" data-filter="A"><img title="ABB" src="{{ U }}/2025/06/abb.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="A" data-filter="A"><img title="Altera" src="{{ U }}/2025/06/altera.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="A" data-filter="A"><img title="AMP" src="{{ U }}/2025/06/amp.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="A" data-filter="A"><img title="Amphenol" src="{{ U }}/2025/06/amphenol.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="A" data-filter="A"><img title="Anadigics" src="{{ U }}/2025/06/anadigics.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="A" data-filter="A"><img title="Analog Devices" src="{{ U }}/2025/06/analog-devices.jpg" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="A" data-filter="A"><img title="Atmel" src="{{ U }}/2025/06/atmel.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="A" data-filter="A"><img title="Avago" src="{{ U }}/2025/06/avago.jpg" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="A" data-filter="A"><img title="AVX" src="{{ U }}/2025/06/avx.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="B" data-filter="B"><img title="Bel Fuse" src="{{ U }}/2025/06/bel-fuse.jpg" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="B" data-filter="B"><img title="Bourns" src="{{ U }}/2025/06/bourns.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="B" data-filter="B"><img title="Broadcom" src="{{ U }}/2025/06/broadcom.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="B" data-filter="B"><img title="Burr-Brown" src="{{ U }}/2025/06/burr-brown.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="C" data-filter="C"><img title="Chery" src="{{ U }}/2025/06/chery.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="C" data-filter="C"><img title="Cirrus Logic" src="{{ U }}/2025/06/cirrus-logic.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="C" data-filter="C"><img title="Cisco" src="{{ U }}/2025/06/cisco.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="C" data-filter="C"><img title="CK Components" src="{{ U }}/2025/06/ck-components.jpg" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="C" data-filter="C"><img title="Coilcraft" src="{{ U }}/2025/06/coilcraft.jpg" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="C" data-filter="C"><img title="Cypress" src="{{ U }}/2025/06/cypress-semiconductor.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="D" data-filter="D"><img title="Dallas" src="{{ U }}/2025/06/dallas-semiconductor.jpg" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="E" data-filter="E"><img title="EPCOS" src="{{ U }}/2025/06/epcos.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="F" data-filter="F"><img title="Fairchild" src="{{ U }}/2025/06/fairchild.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="F" data-filter="F"><img title="FCI" src="{{ U }}/2025/06/fci.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="F" data-filter="F"><img title="Freescale" src="{{ U }}/2025/06/freescale.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="F" data-filter="F"><img title="Fuji Electric" src="{{ U }}/2025/06/fuji-electric.jpg" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="F" data-filter="F"><img title="Fujitsu" src="{{ U }}/2025/06/fujitsu.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="G" data-filter="G"><img title="General Semiconductor" src="{{ U }}/2025/06/general-semiconductor.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="H" data-filter="H"><img title="Harris" src="{{ U }}/2025/06/harris.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="H" data-filter="H"><img title="Hirose" src="{{ U }}/2025/06/hirose.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="H" data-filter="H"><img title="Hitachi" src="{{ U }}/2025/06/hitachi.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="H" data-filter="H"><img title="Honeywell" src="{{ U }}/2025/06/honeywell.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="H" data-filter="H"><img title="Hynix" src="{{ U }}/2025/06/hynix.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="I" data-filter="I"><img title="IBM" src="{{ U }}/2025/06/ibm.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="I" data-filter="I"><img title="Infineon" src="{{ U }}/2025/06/infineon-technologies.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="I" data-filter="I"><img title="Intel" src="{{ U }}/2025/04/intel.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="I" data-filter="I"><img title="International Rectifier" src="{{ U }}/2025/06/international-rectifier-ir.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="I" data-filter="I"><img title="Intersil" src="{{ U }}/2025/06/intersil.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="I" data-filter="I"><img title="ISSI" src="{{ U }}/2025/06/issi.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="I" data-filter="I"><img title="ITT Cannon" src="{{ U }}/2025/06/itt-cannon.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="K" data-filter="K"><img title="Kemet" src="{{ U }}/2025/06/kemet.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="K" data-filter="K"><img title="Kensington" src="{{ U }}/2025/06/kensington.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="K" data-filter="K"><img title="Kingston" src="{{ U }}/2025/04/kingston.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="K" data-filter="K"><img title="KOA" src="{{ U }}/2025/06/koa.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="L" data-filter="L"><img title="Lambda" src="{{ U }}/2025/06/lambda.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="L" data-filter="L"><img title="Lattice" src="{{ U }}/2025/06/lattice.jpg" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="L" data-filter="L"><img title="LG" src="{{ U }}/2025/06/lg.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="L" data-filter="L"><img title="Linear Technology" src="{{ U }}/2025/06/linear-technology.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="L" data-filter="L"><img title="Linksys" src="{{ U }}/2025/06/linksys.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="L" data-filter="L"><img title="Lite-On" src="{{ U }}/2025/06/lite-on.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="L" data-filter="L"><img title="Littelfuse" src="{{ U }}/2025/06/littelfuse.jpg" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="M" data-filter="M"><img title="Marvell" src="{{ U }}/2025/06/marvell.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="M" data-filter="M"><img title="Matsushita" src="{{ U }}/2025/06/matushita-electric.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="M" data-filter="M"><img title="Maxim" src="{{ U }}/2025/06/maxim-integrated-products.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="M" data-filter="M"><img title="Microchip" src="{{ U }}/2025/06/microchip.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="M" data-filter="M"><img title="Micron" src="{{ U }}/2025/06/micron.jpg" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="M" data-filter="M"><img title="Microsemi" src="{{ U }}/2025/06/microsemi.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="M" data-filter="M"><img title="Mitsubishi" src="{{ U }}/2025/06/mitsubishi.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="M" data-filter="M"><img title="Molex" src="{{ U }}/2025/06/molex.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="M" data-filter="M"><img title="Motorola" src="{{ U }}/2025/06/motorola.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="M" data-filter="M"><img title="Murata" src="{{ U }}/2025/06/murata.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="N" data-filter="N"><img title="National Semi" src="{{ U }}/2025/06/national-semiconductor.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="N" data-filter="N"><img title="NEC" src="{{ U }}/2025/06/nec.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="N" data-filter="N"><img title="Nichicon" src="{{ U }}/2025/06/nichicon.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="N" data-filter="N"><img title="Nippon Chemi-Con" src="{{ U }}/2025/06/nippon-chemi-con.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="N" data-filter="N"><img title="NXP" src="{{ U }}/2025/06/nxp.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="O" data-filter="O"><img title="Omron" src="{{ U }}/2025/06/omron.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="O" data-filter="O"><img title="ON Semiconductor" src="{{ U }}/2025/06/on-semiconductor.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="P" data-filter="P"><img title="Panasonic" src="{{ U }}/2025/06/panasonic.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="P" data-filter="P"><img title="Philips" src="{{ U }}/2025/06/philips.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="P" data-filter="P"><img title="Pulse" src="{{ U }}/2025/06/pulse.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="R" data-filter="R"><img title="Raychem" src="{{ U }}/2025/06/raychem.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="R" data-filter="R"><img title="Renesas" src="{{ U }}/2025/06/renesas.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="R" data-filter="R"><img title="RF Micro Devices" src="{{ U }}/2025/06/rf-micro-devices.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="R" data-filter="R"><img title="Ricoh" src="{{ U }}/2025/06/ricoh.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="R" data-filter="R"><img title="ROHM" src="{{ U }}/2025/06/rohm.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="S" data-filter="S"><img title="Samsung" src="{{ U }}/2025/04/samsung.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="S" data-filter="S"><img title="Sanyo" src="{{ U }}/2025/06/sanyo.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="S" data-filter="S"><img title="Seagate" src="{{ U }}/2025/06/seagate.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="S" data-filter="S"><img title="Seiko" src="{{ U }}/2025/06/seiko.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="S" data-filter="S"><img title="Semikron" src="{{ U }}/2025/06/semikron.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="S" data-filter="S"><img title="Sharp" src="{{ U }}/2025/06/sharp.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="S" data-filter="S"><img title="Siemens" src="{{ U }}/2025/06/siemens.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="S" data-filter="S"><img title="Siliconix" src="{{ U }}/2025/06/siliconix.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="S" data-filter="S"><img title="Sony" src="{{ U }}/2025/06/sony.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="S" data-filter="S"><img title="Spansion" src="{{ U }}/2025/06/spansion.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="S" data-filter="S"><img title="STMicroelectronics" src="{{ U }}/2025/06/st-microelectronics.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="T" data-filter="T"><img title="Taiyo Yuden" src="{{ U }}/2025/06/taiyo-yuden.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="T" data-filter="T"><img title="TDK" src="{{ U }}/2025/06/tdk.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="T" data-filter="T"><img title="TE Connectivity" src="{{ U }}/2025/06/te-connectivity-tyco.jpg" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="T" data-filter="T"><img title="Texas Instruments" src="{{ U }}/2025/06/texas-instruments.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="T" data-filter="T"><img title="Toshiba" src="{{ U }}/2025/06/toshiba.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="T" data-filter="T"><img title="Traco Power" src="{{ U }}/2025/06/traco-power.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="V" data-filter="V"><img title="Vishay" src="{{ U }}/2025/06/vishay.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="X" data-filter="X"><img title="Xilinx" src="{{ U }}/2025/06/xilinx.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="Y" data-filter="Y"><img title="Yageo" src="{{ U }}/2025/06/yageo.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="Y" data-filter="Y"><img title="Yamaha" src="{{ U }}/2025/06/yamaha.png" alt="" /></div>
+                <div class="project_hero_image mix" data-letter="Z" data-filter="Z"><img title="Zilog" src="{{ U }}/2025/06/zilog.png" alt="" /></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="bottom_section">
+        <div class="bottom_section_wrap">
+            <article class="bottom_section_title white all_text">Can't Find Your Component?</article>
+            <p class="bottom_section_text">Our sourcing team can locate virtually any part. Tell us what you need.</p>
+            <div class="bottom_section_wraper">
+                <a class="main_button_basic button_basic" href="/contact">Contact Us</a>
+            </div>
+        </div>
+    </section>
+
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    jQuery(document).ready(function($) {
+        var mixer = mixitup('.mixit_active');
+        $('.filter-letter-item').on('click', function() {
+            var letter = $(this).data('letter');
+            $('#selected-letter-output').text(letter);
+            $('.filter-letter-item').removeClass('active');
+            $(this).addClass('active');
+            if (letter) { $('#selected-letter-output').addClass('active'); }
+            else { $('#selected-letter-output').removeClass('active'); }
+            mixer.filter('[data-letter="' + letter + '"]');
+        });
+    });
+</script>
+{% endblock %}

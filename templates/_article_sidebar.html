@@ -1,0 +1,70 @@
+<aside class="article_sidebar">
+
+  {# Search Parts #}
+  <div class="sidebar_widget">
+    <h3 class="sidebar_widget_title">Search Parts</h3>
+    <form class="sidebar_search_form" action="/catalog" method="get" autocomplete="off">
+      <input type="text" name="q" placeholder="Search part number…"
+             class="sidebar_search_input" maxlength="120" spellcheck="false">
+      <button type="submit" class="sidebar_search_btn" aria-label="Search">
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+          <circle cx="9" cy="9" r="6.5" stroke="#0B0B0B" stroke-width="2"/>
+          <path d="M14 14L18.5 18.5" stroke="#0B0B0B" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </form>
+    <p class="sidebar_search_hint">Search by exact part number like STM32H743ZIT6 or a partial keyword</p>
+  </div>
+
+  {# Most Popular / Recent Articles #}
+  <div class="sidebar_widget">
+    <h3 class="sidebar_widget_title">Most Popular</h3>
+    <ul class="sidebar_articles">
+      <li class="sidebar_article_item">
+        <span class="sidebar_art_num">01</span>
+        <div>
+          <a class="sidebar_art_link" href="/news/chip-stock-named-2025-top-north-american-independent-distributors">
+            Chip Stock Named Among the 2025 Top North American Independent Distributors
+          </a>
+          <span class="sidebar_art_meta">Jun 2025 · 3 min read</span>
+        </div>
+      </li>
+      <li class="sidebar_article_item">
+        <span class="sidebar_art_num">02</span>
+        <div>
+          <a class="sidebar_art_link" href="/news/chip-stock-top-electronic-component-distributor-semiconductor-review">
+            Chip Stock Earns Spot as Top Electronic Component Distributor
+          </a>
+          <span class="sidebar_art_meta">Nov 2024 · 4 min read</span>
+        </div>
+      </li>
+      <li class="sidebar_article_item">
+        <span class="sidebar_art_num">03</span>
+        <div>
+          <a class="sidebar_art_link" href="/news/chip-stock-named-top-20-global-independent-distributor-electronics-sourcing">
+            Chip Stock Named Top 20 Global Independent Distributor
+          </a>
+          <span class="sidebar_art_meta">Oct 2024 · 3 min read</span>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  {# Browse Topics #}
+  <div class="sidebar_widget">
+    <h3 class="sidebar_widget_title">Browse Topics</h3>
+    <div class="sidebar_tags">
+      <a href="/catalog?q=semiconductor" class="sidebar_tag">Semiconductor</a>
+      <a href="/catalog?q=memory" class="sidebar_tag">Memory</a>
+      <a href="/catalog?q=processor" class="sidebar_tag">Processors</a>
+      <a href="/catalog?q=transistor" class="sidebar_tag">Transistors</a>
+      <a href="/catalog?q=connector" class="sidebar_tag">Connectors</a>
+      <a href="/catalog?q=capacitor" class="sidebar_tag">Capacitors</a>
+      <a href="/catalog?q=resistor" class="sidebar_tag">Resistors</a>
+      <a href="/catalog?q=ic" class="sidebar_tag">Integrated Circuits</a>
+      <a href="/catalog?q=hard drive" class="sidebar_tag">Hard Drives</a>
+      <a href="/catalog?q=SSD" class="sidebar_tag">SSD</a>
+    </div>
+  </div>
+
+</aside>

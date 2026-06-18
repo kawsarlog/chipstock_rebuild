@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Chip Stock Named Among the 2025 Top North American Independent Distributors — Chipstock{% endblock %}
+
+{% block content %}
+{% set U = "/static/uploads" %}
+<main class="single_news_page">
+
+    <section class="breadcrumbs_section">
+        <div class="breadcrumbs_wrap">
+            <div class="breadcrumbs">
+                <span><a href="/">Main</a></span>
+                <span> › </span>
+                <span><a href="/news">news</a></span>
+                <span> › </span>
+                <span><a href="/news">company news</a></span>
+                <span> › </span>
+                <span>chip stock named among the 2025 top north american independent distributors</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="article_section">
+        <div class="article_wrap">
+            <h1 class="article_page_title">Article <span style="color:#7d7d80;">page</span></h1>
+            <div class="article_with_sidebar">
+
+              {# Main article body #}
+              <div class="article_body">
+                <div class="article_inner">
+                  <div class="article_left">
+                    <div class="article_image">
+                        <img src="{{ U }}/2025/06/chip-stock_award-logo-pdf.jpg" alt="Top Distributors 2025" />
+                    </div>
+                    <div class="article_date">June 4, 2025</div>
+                  </div>
+                  <div class="article_right">
+                    <div class="article_content">
+                        <p><strong>CHARLOTTE, NORTH CAROLINA – June 4, 2025</strong> – Chip Stock, a global independent distributor specializing in fast, reliable sourcing of electronic components, has been recognized as one of the top independent electronic component distributors in North America for 2025 by Supply Chain Connect. It's an honor that truly highlights our commitment and hard work in supporting clients during a challenging year for the industry.</p>
+                        <p>This year's industry report, "2025's Trends, Challenges, and Opportunities in Electronic Component Distribution," clearly paints a picture of supply chains facing disruptions nonstop. With components in short supply, obsolescence increasing, geopolitical tensions rising, and markets swinging unpredictably, it's a wild ride. Companies able to provide factory-direct, reliable sourcing plus quick turnarounds are crucial.</p>
+                        <p>"Our clients have very reliable, immediate access to all critical components due to our own focus upon factory direct sourcing along with tailored supply chain solutions while at Chip Stock," said Dustin Osborne, President of Chip Stock. "This recognition reflects our dedication to addressing the industry's most pressing challenges—shortages, obsolescence and delivery issues—so our customers can continue to do what they do best."</p>
+                        <p>Chip Stock excels in such areas as digital transformation and sustainable practices in addition to supply chain transparency. The report also stresses the strategies of successful companies. Our global sourcing capabilities, strong manufacturer relationships, and calculated inventory optimization enable delivery of dependable, resilient solutions supporting clients' needs despite continuing disruptions.</p>
+                        <p>We are dedicated to the building of resilient, digitally integrated supply chains. We are on this prestigious list because of our commitment to reliability and responsiveness. Our commitment remains in providing customized solutions to help our clients to succeed within the challenging 2025 landscape.</p>
+                        <p><em>Stay ahead of supply chain challenges—visit <a href="/">ChipStock.com</a> for the latest insights, innovative strategies, and real-time solutions to component shortages and obsolescence.</em></p>
+                    </div>
+                    <div class="article_nav">
+                        <a class="article_prev" href="/news">
+                            <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="20" fill="#B6F223"/><path d="M27 20H13" stroke="#0B0B0B" stroke-width="1.5" stroke-linecap="round"/><path d="M19 14L13 20L19 26" stroke="#0B0B0B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            PREVIOUS ARTICLE
+                        </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {# Sidebar #}
+              {% include "_article_sidebar.html" %}
+
+            </div>{# /article_with_sidebar #}
+        </div>
+    </section>
+
+</main>
+{% endblock %}

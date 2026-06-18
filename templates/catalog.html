@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block title %}{{ cat_label }} — Chipstock Catalog{% endblock %}
+
+{% block content %}
+<main class="catalog-page">
+
+  {# ── Page header ── #}
+  <section class="catalog-hero">
+    <div class="wrap">
+      <h1 class="catalog-hero-title">{{ cat_label }}</h1>
+      <p class="catalog-hero-sub">{{ "{:,}".format(total) }} products found</p>
+    </div>
+  </section>
+
+  {# ── Search + Filters ── #}
+  <section class="catalog-filter-section">
+    <div class="wrap">
+      <form class="catalog-form" method="get" action="/catalog" autocomplete="off">
+        <input type="hidden" name="cat" value="{{ cat_key }}">
+        <input type="hidden" name="page" value="1">
+
+        {# Search bar #}
+        <div class="catalog-search-row">
+          <input type="search" name="q" value="{{ q }}"
+                 placeholder="Search part number or keyword…"
+                 class="catalog-input" maxlength="120" spellcheck="false">
+          <button type="submit" class="catalog-search-btn">
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><circle cx="9" cy="9" r="7" stroke="currentColor" stroke-width="2"/><path d="M14 14L19 19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            Search
+          </button>
+        </div>
+
+        {# Category tabs #}
+        <div class="catalog-cat-tabs">
+          {% for item in category_options %}{% set key = item[0] %}{% set label = item[1] %}
+          <a href="/catalog?cat={{ key }}&sort={{ sort }}"
+             class="catalog-cat-tab{% if key == cat_key %} active{% endif %}">{{ label }}</a>
+          {% endfor %}
+        </div>
+
+        {# Component type (sub-category) — shows for Semiconductors / All #}
+        {% if available_subcats %}
+        <div class="catalog-selects-row">
+          <select name="subcat" class="catalog-select catalog-select-wide" onchange="this.form.submit()">
+            <option value="">All Component Types</option>
+            {% for val, lbl in available_subcats %}
+            <option value="{{ val }}"{% if val == subcat %} selected{% endif %}>{{ lbl }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        {% endif %}
+
+        {# Manufacturer + Sort dropdowns #}
+        <div class="catalog-selects-row">
+          <select name="mfr" class="catalog-select" onchange="this.form.submit()">
+            <option value="">All Manufacturers</option>
+            {% for m in manufacturers %}
+            <option value="{{ m }}"{% if m == mfr_filter %} selected{% endif %}>{{ m }}</option>
+            {% endfor %}
+          </select>
+          <select name="sort" class="catalog-select" onchange="this.form.submit()">
+            <option value="name_asc"{% if sort=='name_asc' %} selected{% endif %}>Name A → Z</option>
+            <option value="name_desc"{% if sort=='name_desc' %} selected{% endif %}>Name Z → A</option>
+            <option value="mfr_asc"{% if sort=='mfr_asc' %} selected{% endif %}>Manufacturer A → Z</option>
+          </select>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  {# ── Results ── #}
+  <section class="catalog-results-section">
+    <div class="wrap">
+
+      <p class="catalog-meta-text">
+        Showing <strong>{{ showing_from }}–{{ showing_to }}</strong> of <strong>{{ "{:,}".format(total) }}</strong>
+        {% if q %} for <em>"{{ q }}"</em>{% endif %}
+        {% if mfr_filter %} · {{ mfr_filter }}{% endif %}
+      </p>
+
+      {% if rows %}
+      <div class="catalog-grid">
+        {% for r in rows %}
+        <a href="/catalog/{{ r.product_id }}" class="catalog-card">
+          <div class="catalog-card-img">
+            {% if r.image_url %}
+            <img src="{{ r.image_url | proxy_img }}" alt="{{ r.manufacturer or '' }}" loading="lazy">
+            {% else %}
+            <div class="catalog-card-noimg">No Image</div>
+            {% endif %}
+          </div>
+          <div class="catalog-card-body">
+            <div class="catalog-card-mfr">{{ r.manufacturer or '—' }}</div>
+            <h3 class="catalog-card-title">{{ (r.description or r.product_id)[:90] }}</h3>
+            <div class="catalog-card-pn">{{ r.product_id }}</div>
+            {% if r.category %}
+            <div class="catalog-card-cat">{{ r.category }}{% if r.subcategory %} / {{ r.subcategory }}{% endif %}</div>
+            {% endif %}
+            <span class="catalog-card-cta">View details →</span>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="catalog-empty">
+        <p>No products match your search{% if q %} for <strong>"{{ q }}"</strong>{% endif %}.</p>
+        <a href="/catalog" class="catalog-reset-link">Clear filters</a>
+      </div>
+      {% endif %}
+
+      {# Pagination #}
+      {% if total_pages > 1 %}
+      <nav class="catalog-pagination" aria-label="Pagination">
+        {% set base = '/catalog?cat='~cat_key~'&sort='~sort~('&q='~q if q else '')~('&mfr='~mfr_filter if mfr_filter else '') %}
+        {% if page > 1 %}
+        <a class="pg-link" href="{{ base }}&page={{ page-1 }}">← Prev</a>
+        {% endif %}
+        {% for p in page_numbers %}
+          {% if p == '…' %}
+          <span class="pg-link pg-gap">…</span>
+          {% else %}
+          <a class="pg-link{% if p == page %} active{% endif %}" href="{{ base }}&page={{ p }}">{{ p }}</a>
+          {% endif %}
+        {% endfor %}
+        {% if page < total_pages %}
+        <a class="pg-link" href="{{ base }}&page={{ page+1 }}">Next →</a>
+        {% endif %}
+      </nav>
+      {% endif %}
+
+    </div>
+  </section>
+
+</main>
+{% endblock %}
