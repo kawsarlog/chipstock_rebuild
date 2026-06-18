@@ -20,6 +20,7 @@ from typing import Any, Dict, Generator, List, Optional, Tuple
 from urllib.parse import urlparse
 
 import psycopg2
+import psycopg2.pool
 from flask import (
     Flask, Response, abort, flash, jsonify, redirect,
     render_template, request, url_for,
@@ -87,10 +88,20 @@ SUBCAT_LABELS: Dict[str, str] = {
 }
 
 
+_pool = psycopg2.pool.ThreadedConnectionPool(minconn=2, maxconn=10, **_DB)
+
+
 def _conn():
-    c = psycopg2.connect(**_DB)
+    c = _pool.getconn()
     c.autocommit = False
     return c
+
+
+def _put(c):
+    try:
+        _pool.putconn(c)
+    except Exception:
+        pass
 
 
 def _norm(s: str) -> str:
@@ -120,16 +131,12 @@ def fetch_catalog_page(
         clauses.append("LOWER(TRIM(COALESCE(manufacturer,'')))=LOWER(TRIM(%s))")
         params.append(mfr)
 
-    nq = _norm(q or "")
+    nq = (q or "").strip()[:SEARCH_MAX]
     if nq:
-        norm_expr = "regexp_replace(lower(COALESCE({c},'')), '[^a-z0-9]', '', 'g')"
-        search_cols = ["product_id", "manufacturer", "description"]
         clauses.append(
-            "(" + " OR ".join(
-                f"({norm_expr.format(c=c)} LIKE %s)" for c in search_cols
-            ) + ")"
+            "(product_id ILIKE %s OR manufacturer ILIKE %s OR description ILIKE %s)"
         )
-        params += [f"%{nq}%"] * len(search_cols)
+        params += [f"%{nq}%"] * 3
 
     where = " AND ".join(clauses) if clauses else "1=1"
     offset = (page - 1) * PER_PAGE
@@ -154,7 +161,7 @@ def fetch_catalog_page(
         db.rollback()
         raise
     finally:
-        db.close()
+        _put(db)
 
 
 def fetch_subcats(cat_key: str) -> List[Tuple[str, str]]:
@@ -176,7 +183,7 @@ def fetch_subcats(cat_key: str) -> List[Tuple[str, str]]:
                 for r in cur.fetchall()
             ]
     finally:
-        db.close()
+        _put(db)
 
 
 def fetch_manufacturers(cat_key: str, subcat: Optional[str] = None) -> List[str]:
@@ -197,7 +204,7 @@ def fetch_manufacturers(cat_key: str, subcat: Optional[str] = None) -> List[str]
             )
             return [r[0] for r in cur.fetchall() if r[0]]
     finally:
-        db.close()
+        _put(db)
 
 
 def fetch_related(pid: str, manufacturer: Optional[str], category: Optional[str], source: Optional[str] = None, limit: int = 5) -> List[Dict]:
@@ -213,7 +220,7 @@ def fetch_related(pid: str, manufacturer: Optional[str], category: Optional[str]
                 cur.execute(
                     f"""SELECT {COLS} FROM public.products
                         WHERE product_id <> %s AND category = %s
-                        ORDER BY (LOWER(COALESCE(manufacturer,''))=LOWER(COALESCE(%s,''))) DESC, RANDOM()
+                        ORDER BY (LOWER(COALESCE(manufacturer,''))=LOWER(COALESCE(%s,''))) DESC, product_id
                         LIMIT %s""",
                     (pid, category, manufacturer or "", limit),
                 )
@@ -227,13 +234,13 @@ def fetch_related(pid: str, manufacturer: Optional[str], category: Optional[str]
                         WHERE product_id <> %s
                           AND LOWER(TRIM(COALESCE(manufacturer,''))) = LOWER(TRIM(%s))
                           AND product_id <> ALL(%s)
-                        ORDER BY RANDOM()
+                        ORDER BY product_id
                         LIMIT %s""",
                     (pid, manufacturer, seen, limit - len(results)),
                 )
                 results += list(cur.fetchall())
 
-            # 3) Same source, random — always fills to `limit`
+            # 3) Same source, fill — uses index on source
             if len(results) < limit:
                 seen = [r[0] for r in results] or ["__none__"]
                 src_cond = "AND source = %s" if source else ""
@@ -244,7 +251,7 @@ def fetch_related(pid: str, manufacturer: Optional[str], category: Optional[str]
                           AND product_id <> ALL(%s)
                           AND image_url IS NOT NULL
                           {src_cond}
-                        ORDER BY RANDOM()
+                        ORDER BY product_id
                         LIMIT %s""",
                     [pid, seen] + src_val + [limit - len(results)],
                 )
@@ -255,7 +262,7 @@ def fetch_related(pid: str, manufacturer: Optional[str], category: Optional[str]
     except Exception:
         return []
     finally:
-        db.close()
+        _put(db)
 
 
 def fetch_product(pid: str) -> Optional[Dict]:
@@ -272,7 +279,7 @@ def fetch_product(pid: str) -> Optional[Dict]:
             row = cur.fetchone()
             return dict(zip(cols, row)) if row else None
     finally:
-        db.close()
+        _put(db)
 
 
 def _page_nums(cur: int, total: int) -> List:
@@ -551,7 +558,7 @@ def api_search():
     except Exception:
         return jsonify([])
     finally:
-        db.close()
+        _put(db)
 
 
 @app.route("/api/request-quote", methods=["POST"])
@@ -621,7 +628,7 @@ def sitemap_index():
             cur.execute("SELECT COUNT(*) FROM public.products")
             total: int = cur.fetchone()[0]
     finally:
-        db.close()
+        _put(db)
 
     num_chunks = math.ceil(total / SITEMAP_CHUNK)
     today = datetime.date.today().isoformat()
@@ -692,7 +699,7 @@ def sitemap_products(chunk: int):
                             f"<priority>0.5</priority></url>\n"
                         )
         finally:
-            db.close()
+            _put(db)
         yield '</urlset>\n'
 
     # Check chunk exists (quick count check)
