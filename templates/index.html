@@ -381,33 +381,35 @@
                 </div>
             </div>
             <div class="seven_items home-seven-carousel">
+                {% for p in latest_posts %}
+                <a class="seven_item" href="/news/{{ p.slug }}">
+                    <div class="seven_item_image">
+                        {% if p.featured_image %}
+                        <img src="{{ p.featured_image }}" alt="{{ p.title }}" loading="lazy">
+                        {% else %}
+                        <div style="width:100%;height:100%;background:#1a1a1a;display:flex;align-items:center;justify-content:center;">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="1.2"><path d="M4 16l4-4 4 4 4-8 4 8"/><rect x="2" y="2" width="20" height="20" rx="2"/></svg>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="seven_tem_content">
+                        <div class="seven_item_date">{{ (p.published_at or p.created_at).strftime('%B %d, %Y') if (p.published_at or p.created_at) }}</div>
+                        <span class="seven_item_title">{{ p.title }}</span>
+                        <p class="seven_item_text">{{ p.excerpt or '' }}</p>
+                    </div>
+                    <div class="seven_item_link"><svg class="link-arrow" width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 9H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M10 3L16 9L10 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                </a>
+                {% else %}
                 <a class="seven_item" href="/news">
-                    <div class="seven_item_image"><img src="{{ U }}/2025/06/chip-stock_award-logo-pdf.jpg" alt="Top Distributors 2025"></div>
+                    <div class="seven_item_image"><img src="{{ U }}/2025/06/chip-stock_award-logo-pdf.jpg" alt="News"></div>
                     <div class="seven_tem_content">
                         <div class="seven_item_date">June 4, 2025</div>
-                        <span class="seven_item_title">Chip Stock Named Among the 2025 Top North American Independent Distributors</span>
-                        <p class="seven_item_text">Chip Stock has been recognized as one of the top independent electronic component distributors in North America for 2025 by Supply Chain Connect.</p>
+                        <span class="seven_item_title">Latest Industry News &amp; Updates</span>
+                        <p class="seven_item_text">Stay up to date with the latest from Chipstock — awards, sourcing insights, and supply chain news.</p>
                     </div>
                     <div class="seven_item_link"><svg class="link-arrow" width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 9H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M10 3L16 9L10 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
                 </a>
-                <a class="seven_item" href="/news">
-                    <div class="seven_item_image"><img src="{{ U }}/2025/06/news-images/Top-Distributors-2023.png" alt="Top Distributor Award"></div>
-                    <div class="seven_tem_content">
-                        <div class="seven_item_date">November 1, 2024</div>
-                        <span class="seven_item_title">Chip Stock Earns Spot as Top Electronic Component Distributor by Semiconductor Review</span>
-                        <p class="seven_item_text">Chip Stock has been recognized as a top electronic component distributor by Semiconductor Review for our commitment to fast, reliable sourcing.</p>
-                    </div>
-                    <div class="seven_item_link"><svg class="link-arrow" width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 9H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M10 3L16 9L10 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-                </a>
-                <a class="seven_item" href="/news">
-                    <div class="seven_item_image"><img src="{{ U }}/2025/06/news-images/ESNA Top 10 Emblem.png" alt="ESNA Top 20"></div>
-                    <div class="seven_tem_content">
-                        <div class="seven_item_date">September 15, 2023</div>
-                        <span class="seven_item_title">Chip Stock Named Top 20 Global Independent Distributor by Electronics Sourcing Magazine</span>
-                        <p class="seven_item_text">Chip Stock has been named one of the Top 20 Global Independent Distributors in Electronics Sourcing North America's 2023 report.</p>
-                    </div>
-                    <div class="seven_item_link"><svg class="link-arrow" width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 9H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M10 3L16 9L10 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-                </a>
+                {% endfor %}
             </div>
             <div class="seven_mob_link seven_link">
                 <a class="link_basic" href="/news">All News

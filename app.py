@@ -513,7 +513,8 @@ def _send_brevo(payload: Dict[str, str]) -> Tuple[bool, str]:
 # ── Marketing routes ─────────────────────────────────────────────────────────
 @app.route("/")
 def index():
-    return render_template("index.html")
+    latest_posts = _blog_get_all(include_drafts=False)[:4]
+    return render_template("index.html", latest_posts=latest_posts)
 
 
 @app.route("/about")
