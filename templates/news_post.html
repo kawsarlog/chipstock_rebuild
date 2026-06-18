@@ -56,13 +56,12 @@
 }
 .post-tag:hover { border-color: #B6F223; color: #B6F223; }
 
-/* Featured image */
-.post-featured-img {
-  max-width: 1000px; margin: 0 auto;
-  padding: 0 2rem 2.5rem;
+/* Featured image — inline inside content column */
+.post-featured-img-inline {
+  margin-bottom: 2rem;
 }
-.post-featured-img img {
-  width: 100%; max-height: 480px; object-fit: cover;
+.post-featured-img-inline img {
+  width: 100%; max-height: 460px; object-fit: cover;
   display: block; border: 1px solid #1e1e1e;
 }
 
@@ -84,20 +83,20 @@
 }
 .post-content h1 { font-size: 1.9rem; }
 .post-content h2 { font-size: 1.45rem; border-bottom: 1px solid #1e1e1e; padding-bottom: .5rem; }
-.post-content h3 { font-size: 1.15rem; color: #e0e0e0; }
-.post-content p { color: #bbb; line-height: 1.8; margin-bottom: 1.25rem; font-size: .975rem; }
+.post-content h3 { font-size: 1.15rem; color: #f0f0f0; }
+.post-content p { color: #d8d8d8; line-height: 1.8; margin-bottom: 1.25rem; font-size: .975rem; }
 .post-content a { color: #B6F223; text-decoration: underline; text-underline-offset: 3px; }
 .post-content a:hover { opacity: .8; }
-.post-content strong, .post-content b { color: #e8e8e8; font-weight: 700; }
-.post-content em, .post-content i { color: #ccc; }
+.post-content strong, .post-content b { color: #fff; font-weight: 700; }
+.post-content em, .post-content i { color: #e0e0e0; }
 .post-content ul, .post-content ol {
-  color: #bbb; padding-left: 1.5rem; margin-bottom: 1.25rem; line-height: 1.8;
+  color: #d8d8d8; padding-left: 1.5rem; margin-bottom: 1.25rem; line-height: 1.8;
 }
 .post-content li { margin-bottom: .4rem; font-size: .975rem; }
 .post-content blockquote {
   border-left: 3px solid #B6F223; margin: 2rem 0;
-  padding: 1rem 1.5rem; background: rgba(182,242,35,.05);
-  color: #ccc; font-style: italic; font-size: 1.05rem; line-height: 1.7;
+  padding: 1rem 1.5rem; background: rgba(182,242,35,.06);
+  color: #e0e0e0; font-style: italic; font-size: 1.05rem; line-height: 1.7;
 }
 .post-content blockquote::before { content: '\201C'; color: #B6F223;
   font-size: 2rem; line-height: 0; vertical-align: -.5em; margin-right: .2rem; }
@@ -253,17 +252,15 @@
     </div>
   </div>
 
-  <!-- Featured image -->
-  {% if post.featured_image %}
-  <div class="post-featured-img">
-    <img src="{{ post.featured_image }}" alt="{{ post.title }}">
-  </div>
-  {% endif %}
-
   <!-- Body -->
   <div class="post-body-wrap">
     <!-- Content -->
     <article class="post-content">
+      {% if post.featured_image %}
+      <div class="post-featured-img-inline">
+        <img src="{{ post.featured_image }}" alt="{{ post.title }}">
+      </div>
+      {% endif %}
       {{ post.content|safe }}
 
       <!-- Footer -->
