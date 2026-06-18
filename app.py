@@ -19,12 +19,16 @@ from email.utils import parseaddr
 from typing import Any, Dict, Generator, List, Optional, Tuple
 from urllib.parse import urlparse
 
+import functools
+import uuid
+
 import psycopg2
 import psycopg2.pool
 from flask import (
     Flask, Response, abort, flash, jsonify, redirect,
-    render_template, request, url_for,
+    render_template, request, session, url_for,
 )
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "chipstock-v2-secret")
@@ -102,6 +106,147 @@ def _put(c):
         _pool.putconn(c)
     except Exception:
         pass
+
+
+# ── Admin / Blog ─────────────────────────────────────────────────────────────
+ADMIN_USER = "admin"
+ADMIN_PASS = "Chipstock@2025"
+BLOG_UPLOAD_DIR = os.path.join(os.path.dirname(__file__), "static", "uploads", "blog")
+ALLOWED_IMG = {"png", "jpg", "jpeg", "gif", "webp", "svg"}
+os.makedirs(BLOG_UPLOAD_DIR, exist_ok=True)
+
+
+def login_required(f):
+    @functools.wraps(f)
+    def wrapper(*args, **kwargs):
+        if not session.get("admin_logged_in"):
+            return redirect(url_for("admin_login"))
+        return f(*args, **kwargs)
+    return wrapper
+
+
+def _blog_get_all(include_drafts=False):
+    db = _conn()
+    try:
+        with db.cursor() as cur:
+            cond = "" if include_drafts else "WHERE status = 'published'"
+            cur.execute(f"""
+                SELECT id, title, slug, excerpt, featured_image, author, category,
+                       tags, status, created_at, published_at
+                FROM blog_posts {cond}
+                ORDER BY COALESCE(published_at, created_at) DESC
+            """)
+            cols = [d[0] for d in cur.description]
+            return [dict(zip(cols, r)) for r in cur.fetchall()]
+    finally:
+        _put(db)
+
+
+def _blog_get_slug(slug):
+    db = _conn()
+    try:
+        with db.cursor() as cur:
+            cur.execute("""
+                SELECT id, title, slug, excerpt, content, featured_image, author,
+                       category, tags, seo_title, seo_description, status, created_at, published_at
+                FROM blog_posts WHERE slug = %s
+            """, (slug,))
+            row = cur.fetchone()
+            if not row:
+                return None
+            cols = [d[0] for d in cur.description]
+            return dict(zip(cols, row))
+    finally:
+        _put(db)
+
+
+def _blog_get_id(post_id):
+    db = _conn()
+    try:
+        with db.cursor() as cur:
+            cur.execute("""
+                SELECT id, title, slug, excerpt, content, featured_image, author,
+                       category, tags, seo_title, seo_description, status, created_at, published_at
+                FROM blog_posts WHERE id = %s
+            """, (post_id,))
+            row = cur.fetchone()
+            if not row:
+                return None
+            cols = [d[0] for d in cur.description]
+            return dict(zip(cols, row))
+    finally:
+        _put(db)
+
+
+def _blog_create(data):
+    db = _conn()
+    try:
+        with db.cursor() as cur:
+            pub_at = datetime.datetime.utcnow() if data.get("status") == "published" else None
+            cur.execute("""
+                INSERT INTO blog_posts (title, slug, excerpt, content, featured_image,
+                    author, category, tags, seo_title, seo_description, status, published_at)
+                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id
+            """, (
+                data["title"], data["slug"], data.get("excerpt"), data.get("content"),
+                data.get("featured_image"), data.get("author", "Chipstock Team"),
+                data.get("category"), data.get("tags", []),
+                data.get("seo_title") or data["title"],
+                data.get("seo_description") or data.get("excerpt", ""),
+                data.get("status", "draft"), pub_at,
+            ))
+            post_id = cur.fetchone()[0]
+        db.commit()
+        return post_id
+    except Exception:
+        db.rollback()
+        raise
+    finally:
+        _put(db)
+
+
+def _blog_update(post_id, data):
+    db = _conn()
+    try:
+        with db.cursor() as cur:
+            cur.execute("SELECT status, published_at FROM blog_posts WHERE id=%s", (post_id,))
+            row = cur.fetchone()
+            pub_at = row[1] if row else None
+            if data.get("status") == "published" and pub_at is None:
+                pub_at = datetime.datetime.utcnow()
+            cur.execute("""
+                UPDATE blog_posts SET
+                    title=%s, slug=%s, excerpt=%s, content=%s, featured_image=%s,
+                    author=%s, category=%s, tags=%s, seo_title=%s, seo_description=%s,
+                    status=%s, published_at=%s, updated_at=NOW()
+                WHERE id=%s
+            """, (
+                data["title"], data["slug"], data.get("excerpt"), data.get("content"),
+                data.get("featured_image"), data.get("author", "Chipstock Team"),
+                data.get("category"), data.get("tags", []),
+                data.get("seo_title") or data["title"],
+                data.get("seo_description") or data.get("excerpt", ""),
+                data.get("status", "draft"), pub_at, post_id,
+            ))
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+    finally:
+        _put(db)
+
+
+def _blog_delete(post_id):
+    db = _conn()
+    try:
+        with db.cursor() as cur:
+            cur.execute("DELETE FROM blog_posts WHERE id=%s", (post_id,))
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+    finally:
+        _put(db)
 
 
 def _norm(s: str) -> str:
@@ -398,22 +543,126 @@ def excess():
 
 @app.route("/news")
 def news():
-    return render_template("news.html")
+    posts = _blog_get_all(include_drafts=False)
+    return render_template("news.html", posts=posts)
 
 
-@app.route("/news/chip-stock-named-2025-top-north-american-independent-distributors")
-def news_article_1():
-    return render_template("news_article_1.html")
+@app.route("/news/<slug>")
+def news_post(slug):
+    post = _blog_get_slug(slug)
+    if not post or post["status"] != "published":
+        abort(404)
+    recent = [p for p in _blog_get_all() if p["slug"] != slug][:4]
+    return render_template("news_post.html", post=post, recent=recent)
 
 
-@app.route("/news/chip-stock-top-electronic-component-distributor-semiconductor-review")
-def news_article_2():
-    return render_template("news_article_2.html")
+# ── Admin ─────────────────────────────────────────────────────────────────────
+@app.route("/admin")
+def admin_index():
+    if not session.get("admin_logged_in"):
+        return redirect(url_for("admin_login"))
+    return redirect(url_for("admin_posts"))
 
 
-@app.route("/news/chip-stock-named-top-20-global-independent-distributor-electronics-sourcing")
-def news_article_3():
-    return render_template("news_article_3.html")
+@app.route("/admin/login", methods=["GET", "POST"])
+def admin_login():
+    error = None
+    if request.method == "POST":
+        if (request.form.get("username") == ADMIN_USER and
+                request.form.get("password") == ADMIN_PASS):
+            session["admin_logged_in"] = True
+            session.permanent = True
+            return redirect(url_for("admin_posts"))
+        error = "Invalid username or password."
+    return render_template("admin/login.html", error=error)
+
+
+@app.route("/admin/logout")
+def admin_logout():
+    session.clear()
+    return redirect(url_for("admin_login"))
+
+
+@app.route("/admin/posts")
+@login_required
+def admin_posts():
+    posts = _blog_get_all(include_drafts=True)
+    return render_template("admin/posts.html", posts=posts)
+
+
+@app.route("/admin/posts/new", methods=["GET", "POST"])
+@login_required
+def admin_post_new():
+    if request.method == "POST":
+        tags_raw = request.form.get("tags", "")
+        tags = [t.strip() for t in tags_raw.split(",") if t.strip()]
+        data = {
+            "title": request.form["title"],
+            "slug": request.form["slug"],
+            "excerpt": request.form.get("excerpt", ""),
+            "content": request.form.get("content", ""),
+            "featured_image": request.form.get("featured_image", ""),
+            "author": request.form.get("author", "Chipstock Team"),
+            "category": request.form.get("category", ""),
+            "tags": tags,
+            "seo_title": request.form.get("seo_title", ""),
+            "seo_description": request.form.get("seo_description", ""),
+            "status": request.form.get("status", "draft"),
+        }
+        _blog_create(data)
+        flash("Post created successfully.", "success")
+        return redirect(url_for("admin_posts"))
+    return render_template("admin/post_editor.html", post=None)
+
+
+@app.route("/admin/posts/<int:post_id>/edit", methods=["GET", "POST"])
+@login_required
+def admin_post_edit(post_id):
+    post = _blog_get_id(post_id)
+    if not post:
+        abort(404)
+    if request.method == "POST":
+        tags_raw = request.form.get("tags", "")
+        tags = [t.strip() for t in tags_raw.split(",") if t.strip()]
+        data = {
+            "title": request.form["title"],
+            "slug": request.form["slug"],
+            "excerpt": request.form.get("excerpt", ""),
+            "content": request.form.get("content", ""),
+            "featured_image": request.form.get("featured_image", ""),
+            "author": request.form.get("author", "Chipstock Team"),
+            "category": request.form.get("category", ""),
+            "tags": tags,
+            "seo_title": request.form.get("seo_title", ""),
+            "seo_description": request.form.get("seo_description", ""),
+            "status": request.form.get("status", "draft"),
+        }
+        _blog_update(post_id, data)
+        flash("Post updated successfully.", "success")
+        return redirect(url_for("admin_posts"))
+    return render_template("admin/post_editor.html", post=post)
+
+
+@app.route("/admin/posts/<int:post_id>/delete", methods=["POST"])
+@login_required
+def admin_post_delete(post_id):
+    _blog_delete(post_id)
+    flash("Post deleted.", "success")
+    return redirect(url_for("admin_posts"))
+
+
+@app.route("/admin/upload-image", methods=["POST"])
+@login_required
+def admin_upload_image():
+    f = request.files.get("image")
+    if not f:
+        return jsonify({"error": "No file"}), 400
+    ext = f.filename.rsplit(".", 1)[-1].lower() if "." in f.filename else ""
+    if ext not in ALLOWED_IMG:
+        return jsonify({"error": "File type not allowed"}), 400
+    fname = f"{uuid.uuid4().hex}.{ext}"
+    f.save(os.path.join(BLOG_UPLOAD_DIR, fname))
+    return jsonify({"url": f"/static/uploads/blog/{fname}"})
 
 
 @app.route("/contact")

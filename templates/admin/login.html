@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin Login — Chipstock</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background:#0b0b0b;font-family:'Inter',system-ui,sans-serif;color:#fff}
+.card{width:100%;max-width:420px;background:#111;border:1px solid rgba(255,255,255,.09);
+  padding:2.5rem 2rem;animation:fadeIn .5s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+.logo{display:flex;align-items:center;gap:.6rem;margin-bottom:2rem}
+.logo img{height:32px}
+.logo span{font-size:1rem;font-weight:700;color:#fff;letter-spacing:.03em}
+h1{font-size:1.4rem;font-weight:700;margin-bottom:.4rem}
+.sub{color:#888;font-size:.875rem;margin-bottom:1.75rem}
+label{display:block;font-size:.78rem;font-weight:600;color:#aaa;
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:.4rem}
+input[type=text],input[type=password]{width:100%;background:#1a1a1a;border:1px solid #2a2a2a;
+  color:#fff;padding:.75rem 1rem;font-size:.9rem;outline:none;margin-bottom:1.25rem;
+  transition:border .2s}
+input:focus{border-color:#B6F223}
+.btn{width:100%;background:#B6F223;color:#0b0b0b;font-weight:700;font-size:.95rem;
+  padding:.85rem;border:none;cursor:pointer;letter-spacing:.02em;transition:opacity .2s}
+.btn:hover{opacity:.85}
+.error{background:rgba(255,80,80,.1);border:1px solid rgba(255,80,80,.3);
+  color:#ff6b6b;padding:.75rem 1rem;font-size:.85rem;margin-bottom:1.25rem}
+.grid-bg{position:fixed;inset:0;z-index:-1;
+  background-image:linear-gradient(rgba(182,242,35,.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(182,242,35,.03) 1px,transparent 1px);
+  background-size:48px 48px}
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+<div class="card">
+  <div class="logo">
+    <img src="/static/uploads/2025/05/logo.webp" alt="Chipstock">
+  </div>
+  <h1>Admin Login</h1>
+  <p class="sub">Sign in to manage blog posts and content.</p>
+  {% if error %}
+  <div class="error">{{ error }}</div>
+  {% endif %}
+  <form method="post">
+    <label>Username</label>
+    <input type="text" name="username" autocomplete="username" required>
+    <label>Password</label>
+    <input type="password" name="password" autocomplete="current-password" required>
+    <button type="submit" class="btn">Sign In</button>
+  </form>
+</div>
+</body>
+</html>

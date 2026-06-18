@@ -1,82 +1,157 @@
 {% extends "base.html" %}
-{% block title %}News — Chipstock{% endblock %}
-
+{% block title %}News & Blog — Chipstock{% endblock %}
+{% block extra_head %}
+<style>
+.news-hero{background:#0b0b0b;padding:5rem 2rem 3rem;text-align:center;position:relative;overflow:hidden;border-bottom:1px solid #1a1a1a}
+.news-hero::before{content:'';position:absolute;inset:0;
+  background-image:linear-gradient(rgba(182,242,35,.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(182,242,35,.04) 1px,transparent 1px);
+  background-size:48px 48px;pointer-events:none}
+.news-hero-chip{display:inline-block;padding:.3rem .9rem;border:1px solid rgba(182,242,35,.4);
+  color:#B6F223;font-size:.7rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin-bottom:1.25rem}
+.news-hero h1{font-size:clamp(2rem,5vw,3.2rem);font-weight:800;color:#fff;line-height:1.1;margin-bottom:1rem}
+.news-hero h1 span{color:#B6F223}
+.news-hero p{color:#888;font-size:1rem;max-width:520px;margin:0 auto}
+.news-cats{display:flex;gap:.5rem;justify-content:center;margin-top:1.75rem;flex-wrap:wrap}
+.news-cat{padding:.4rem 1rem;border:1px solid #2a2a2a;color:#888;text-decoration:none;
+  font-size:.78rem;font-weight:600;transition:all .2s}
+.news-cat.active,.news-cat:hover{border-color:#B6F223;color:#B6F223;background:rgba(182,242,35,.06)}
+/* Grid */
+.news-grid-section{padding:4rem 2rem;max-width:1200px;margin:0 auto}
+.news-featured{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem}
+.news-rest{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+/* Cards */
+.news-card{background:#111;border:1px solid #1e1e1e;text-decoration:none;color:#fff;
+  display:flex;flex-direction:column;transition:border-color .2s,transform .2s;overflow:hidden}
+.news-card:hover{border-color:#B6F223;transform:translateY(-3px)}
+.news-card-img{aspect-ratio:16/9;overflow:hidden;background:#0d0d0d;position:relative}
+.news-card-img img{width:100%;height:100%;object-fit:cover;transition:transform .4s}
+.news-card:hover .news-card-img img{transform:scale(1.04)}
+.news-card-img-placeholder{width:100%;height:100%;display:flex;align-items:center;
+  justify-content:center;background:linear-gradient(135deg,#111 0%,#1a1a1a 100%)}
+.news-card-body{padding:1.25rem;flex:1;display:flex;flex-direction:column}
+.news-meta{display:flex;align-items:center;gap:.6rem;margin-bottom:.75rem;flex-wrap:wrap}
+.news-cat-badge{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;
+  color:#B6F223;background:rgba(182,242,35,.1);border:1px solid rgba(182,242,35,.2);padding:.2rem .5rem}
+.news-date{font-size:.75rem;color:#555}
+.news-card-title{font-size:1rem;font-weight:700;color:#fff;line-height:1.35;margin-bottom:.6rem;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.news-card-excerpt{font-size:.82rem;color:#888;line-height:1.6;flex:1;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.news-card-footer{display:flex;align-items:center;justify-content:space-between;
+  margin-top:1rem;padding-top:.75rem;border-top:1px solid #1a1a1a}
+.news-read-more{font-size:.78rem;font-weight:700;color:#B6F223;letter-spacing:.04em;text-transform:uppercase}
+.news-card-arrow svg{transition:transform .2s}
+.news-card:hover .news-card-arrow svg{transform:translateX(4px)}
+/* Featured card */
+.news-card.featured .news-card-img{aspect-ratio:16/10}
+.news-card.featured .news-card-title{font-size:1.2rem;-webkit-line-clamp:4}
+/* Empty state */
+.news-empty{text-align:center;padding:5rem 2rem;color:#555}
+.news-empty h2{font-size:1.5rem;color:#333;margin-bottom:.75rem}
+.news-empty a{color:#B6F223;text-decoration:none}
+@media(max-width:900px){.news-featured{grid-template-columns:1fr}.news-rest{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.news-rest{grid-template-columns:1fr}}
+</style>
+{% endblock %}
 {% block content %}
-{% set U = "/static/uploads" %}
-<main class="news_page">
+<main>
+  <!-- Hero -->
+  <section class="news-hero">
+    <div class="news-hero-chip">Insights & Updates</div>
+    <h1>News & <span>Blog</span></h1>
+    <p>Industry insights, company updates, and expert guidance on electronic component sourcing.</p>
+    <div class="news-cats">
+      <a href="/news" class="news-cat active">All Posts</a>
+      <a href="/news?cat=Industry+News" class="news-cat">Industry News</a>
+      <a href="/news?cat=Component+Sourcing" class="news-cat">Component Sourcing</a>
+      <a href="/news?cat=Supply+Chain" class="news-cat">Supply Chain</a>
+      <a href="/news?cat=Company+Updates" class="news-cat">Company Updates</a>
+    </div>
+  </section>
 
-    <section class="breadcrumbs_section">
-        <div class="breadcrumbs_wrap">
-            <div class="breadcrumbs">
-                <span><a href="/">Main</a></span>
-                <span> › </span>
-                <span>news</span>
-                <span> › </span>
-                <span>company news</span>
+  <!-- Posts grid -->
+  <section class="news-grid-section">
+    {% if not posts %}
+    <div class="news-empty">
+      <h2>No posts yet</h2>
+      <p>Check back soon for industry insights and company updates.</p>
+      {% if session.get('admin_logged_in') %}
+      <p style="margin-top:1rem"><a href="/admin/posts/new">+ Create your first post →</a></p>
+      {% endif %}
+    </div>
+    {% else %}
+      {% set featured = posts[:2] %}
+      {% set rest = posts[2:] %}
+      <!-- Featured top 2 -->
+      {% if featured %}
+      <div class="news-featured">
+        {% for p in featured %}
+        <a class="news-card featured" href="/news/{{ p.slug }}">
+          <div class="news-card-img">
+            {% if p.featured_image %}
+            <img src="{{ p.featured_image }}" alt="{{ p.title }}" loading="lazy">
+            {% else %}
+            <div class="news-card-img-placeholder">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#2a2a2a" stroke-width="1.2"><path d="M4 16l4-4 4 4 4-8 4 8"/><rect x="2" y="2" width="20" height="20" rx="2"/></svg>
             </div>
-        </div>
-    </section>
-
-    <section class="second_section" id="second-section">
-        <div class="second_fon"></div>
-        <div class="second_wrap">
-            <div class="second_top">
-                <article class="second_title black all_text"><h2><span style="color:#7d7d80;">Our</span> news</h2></article>
-                <div class="second_categories">
-                    <a href="/news" class="active">Company news</a>
-                    <a href="/news">Industry News</a>
-                </div>
+            {% endif %}
+          </div>
+          <div class="news-card-body">
+            <div class="news-meta">
+              {% if p.category %}<span class="news-cat-badge">{{ p.category }}</span>{% endif %}
+              <span class="news-date">
+                {{ (p.published_at or p.created_at).strftime('%B %d, %Y') if (p.published_at or p.created_at) }}
+              </span>
             </div>
-            <div class="second_items">
-                <a class="second_item" href="/news/chip-stock-named-2025-top-north-american-independent-distributors">
-                    <div class="second_item_image">
-                        <img src="{{ U }}/2025/06/chip-stock_award-logo-pdf.jpg" alt="Top Distributors 2025" />
-                    </div>
-                    <div class="second_tem_content">
-                        <div class="second_item_date">June 4, 2025</div>
-                        <span class="second_item_title">Chip Stock Named Among the 2025 Top North American Independent Distributors</span>
-                        <div class="second_item_text">CHARLOTTE, NORTH CAROLINA – June 4, 2025 – Chip Stock, a global independent distributor specializing in fast, reliable sourcing of electronic components, has been recognized as one of the top independent electronic component distributors in North America for 2025 by Supply Chain Connect. It's an honor that truly highlights our commitment and hard work in [...]</div>
-                    </div>
-                    <div class="second_item_link">
-                        <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="20" fill="#B6F223"/><path d="M13 20H27" stroke="#0B0B0B" stroke-width="1.5" stroke-linecap="round"/><path d="M21 14L27 20L21 26" stroke="#0B0B0B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    </div>
-                </a>
-                <a class="second_item" href="/news/chip-stock-top-electronic-component-distributor-semiconductor-review">
-                    <div class="second_item_image">
-                        <img src="{{ U }}/2025/06/news-images/Top-Distributors-2023.png" alt="Top Electronic Component Distributor" />
-                    </div>
-                    <div class="second_tem_content">
-                        <div class="second_item_date">November 1, 2024</div>
-                        <span class="second_item_title">Chip Stock Earns Spot as Top Electronic Component Distributor by Semiconductor Review</span>
-                        <div class="second_item_text">In response to the global surge in e-commerce, expectations for B2B supply chains have shifted drastically. Clients now anticipate the same level of ease and efficiency they enjoy in B2C online shopping experiences. With many adopting a 'just in time' buying strategy — expedited delivery has become more essential than ever. Chip [...]</div>
-                    </div>
-                    <div class="second_item_link">
-                        <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="20" fill="#B6F223"/><path d="M13 20H27" stroke="#0B0B0B" stroke-width="1.5" stroke-linecap="round"/><path d="M21 14L27 20L21 26" stroke="#0B0B0B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    </div>
-                </a>
-                <a class="second_item" href="/news/chip-stock-named-top-20-global-independent-distributor-electronics-sourcing">
-                    <div class="second_item_image">
-                        <img src="{{ U }}/2025/06/news-images/ESNA Top 10 Emblem.png" alt="ESNA Top 20" />
-                    </div>
-                    <div class="second_tem_content">
-                        <div class="second_item_date">September 15, 2023</div>
-                        <span class="second_item_title">Chip Stock Named Top 20 Global Independent Distributor by Electronics Sourcing Magazine</span>
-                        <div class="second_item_text">CHARLOTTE, NORTH CAROLINA – September 15, 2023 – Chip Stock, a factory direct electronic component distributor and supply chain solution service, today announced it has been named as one of the Top 20 Global Independent Distributors in Electronics Sourcing North America's 2023 report. [...]</div>
-                    </div>
-                    <div class="second_item_link">
-                        <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="20" fill="#B6F223"/><path d="M13 20H27" stroke="#0B0B0B" stroke-width="1.5" stroke-linecap="round"/><path d="M21 14L27 20L21 26" stroke="#0B0B0B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    </div>
-                </a>
+            <div class="news-card-title">{{ p.title }}</div>
+            <div class="news-card-excerpt">{{ p.excerpt or '' }}</div>
+            <div class="news-card-footer">
+              <span class="news-read-more">Read More</span>
+              <span class="news-card-arrow">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#B6F223" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </span>
             </div>
-            <div class="second_pagination">
-                <span class="page-numbers current">1</span>
-                <a class="page-numbers" href="#">2</a>
-                <a class="page-numbers next" href="#">
-                    <svg width="13" height="8" viewBox="0 0 13 8" fill="none"><path d="M1 4H12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M9 1L12 4L9 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </a>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+      {% endif %}
+      <!-- Rest -->
+      {% if rest %}
+      <div class="news-rest">
+        {% for p in rest %}
+        <a class="news-card" href="/news/{{ p.slug }}">
+          <div class="news-card-img">
+            {% if p.featured_image %}
+            <img src="{{ p.featured_image }}" alt="{{ p.title }}" loading="lazy">
+            {% else %}
+            <div class="news-card-img-placeholder">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#2a2a2a" stroke-width="1.2"><path d="M4 16l4-4 4 4 4-8 4 8"/><rect x="2" y="2" width="20" height="20" rx="2"/></svg>
             </div>
-        </div>
-    </section>
-
+            {% endif %}
+          </div>
+          <div class="news-card-body">
+            <div class="news-meta">
+              {% if p.category %}<span class="news-cat-badge">{{ p.category }}</span>{% endif %}
+              <span class="news-date">
+                {{ (p.published_at or p.created_at).strftime('%b %d, %Y') if (p.published_at or p.created_at) }}
+              </span>
+            </div>
+            <div class="news-card-title">{{ p.title }}</div>
+            <div class="news-card-excerpt">{{ p.excerpt or '' }}</div>
+            <div class="news-card-footer">
+              <span class="news-read-more">Read More</span>
+              <span class="news-card-arrow">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#B6F223" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </span>
+            </div>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+      {% endif %}
+    {% endif %}
+  </section>
 </main>
 {% endblock %}

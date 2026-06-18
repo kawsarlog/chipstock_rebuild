@@ -1,0 +1,352 @@
+{% extends "base.html" %}
+{% block title %}{{ post.seo_title or post.title }} — Chipstock{% endblock %}
+{% block extra_head %}
+<meta name="description" content="{{ post.seo_description or post.excerpt or '' }}">
+<meta property="og:title" content="{{ post.seo_title or post.title }}">
+<meta property="og:description" content="{{ post.seo_description or post.excerpt or '' }}">
+{% if post.featured_image %}<meta property="og:image" content="{{ post.featured_image }}">{% endif %}
+<meta property="og:type" content="article">
+<link rel="canonical" href="https://chipstock.com/news/{{ post.slug }}">
+<style>
+/* ── Post Page Layout ─────────────────────────────────────────────────── */
+.post-page { background: #0b0b0b; min-height: 100vh; }
+
+/* Hero */
+.post-hero {
+  position: relative; overflow: hidden;
+  background: #0b0b0b; border-bottom: 1px solid #1a1a1a;
+  padding: 4rem 2rem 3rem;
+}
+.post-hero::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(182,242,35,.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(182,242,35,.035) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+.post-hero-inner { max-width: 800px; margin: 0 auto; position: relative; }
+.breadcrumbs { display: flex; align-items: center; gap: .4rem;
+  font-size: .78rem; color: #555; margin-bottom: 1.5rem; flex-wrap: wrap; }
+.breadcrumbs a { color: #666; text-decoration: none; }
+.breadcrumbs a:hover { color: #B6F223; }
+.breadcrumbs span { color: #333; }
+.post-meta-top { display: flex; align-items: center; gap: .75rem;
+  margin-bottom: 1.25rem; flex-wrap: wrap; }
+.post-cat-badge {
+  font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em;
+  color: #B6F223; background: rgba(182,242,35,.1);
+  border: 1px solid rgba(182,242,35,.25); padding: .25rem .65rem;
+}
+.post-date { font-size: .8rem; color: #555; }
+.post-author-line { font-size: .8rem; color: #555; }
+.post-author-line span { color: #888; }
+.post-hero-title {
+  font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 800;
+  color: #fff; line-height: 1.15; margin-bottom: 1.25rem;
+}
+.post-excerpt {
+  font-size: 1.05rem; color: #999; line-height: 1.65;
+  border-left: 2px solid #B6F223; padding-left: 1rem;
+}
+.post-tags { display: flex; gap: .4rem; flex-wrap: wrap; margin-top: 1.25rem; }
+.post-tag {
+  font-size: .7rem; color: #666; background: #161616;
+  border: 1px solid #222; padding: .2rem .6rem;
+  text-decoration: none; transition: all .2s;
+}
+.post-tag:hover { border-color: #B6F223; color: #B6F223; }
+
+/* Featured image */
+.post-featured-img {
+  max-width: 1000px; margin: 0 auto;
+  padding: 0 2rem 2.5rem;
+}
+.post-featured-img img {
+  width: 100%; max-height: 480px; object-fit: cover;
+  display: block; border: 1px solid #1e1e1e;
+}
+
+/* Body layout */
+.post-body-wrap {
+  max-width: 1100px; margin: 0 auto;
+  padding: 3rem 2rem 5rem;
+  display: grid; grid-template-columns: 1fr 290px; gap: 3rem; align-items: start;
+}
+@media (max-width: 900px) {
+  .post-body-wrap { grid-template-columns: 1fr; }
+  .post-sidebar { order: 2; }
+}
+
+/* Article content */
+.post-content { min-width: 0; }
+.post-content h1,.post-content h2,.post-content h3,.post-content h4 {
+  color: #fff; line-height: 1.3; margin: 2rem 0 .75rem; font-weight: 700;
+}
+.post-content h1 { font-size: 1.9rem; }
+.post-content h2 { font-size: 1.45rem; border-bottom: 1px solid #1e1e1e; padding-bottom: .5rem; }
+.post-content h3 { font-size: 1.15rem; color: #e0e0e0; }
+.post-content p { color: #bbb; line-height: 1.8; margin-bottom: 1.25rem; font-size: .975rem; }
+.post-content a { color: #B6F223; text-decoration: underline; text-underline-offset: 3px; }
+.post-content a:hover { opacity: .8; }
+.post-content strong, .post-content b { color: #e8e8e8; font-weight: 700; }
+.post-content em, .post-content i { color: #ccc; }
+.post-content ul, .post-content ol {
+  color: #bbb; padding-left: 1.5rem; margin-bottom: 1.25rem; line-height: 1.8;
+}
+.post-content li { margin-bottom: .4rem; font-size: .975rem; }
+.post-content blockquote {
+  border-left: 3px solid #B6F223; margin: 2rem 0;
+  padding: 1rem 1.5rem; background: rgba(182,242,35,.05);
+  color: #ccc; font-style: italic; font-size: 1.05rem; line-height: 1.7;
+}
+.post-content blockquote::before { content: '\201C'; color: #B6F223;
+  font-size: 2rem; line-height: 0; vertical-align: -.5em; margin-right: .2rem; }
+.post-content img {
+  max-width: 100%; height: auto; display: block;
+  margin: 1.75rem auto; border: 1px solid #1e1e1e;
+}
+.post-content pre {
+  background: #141414; border: 1px solid #2a2a2a; padding: 1.25rem;
+  overflow-x: auto; margin-bottom: 1.25rem; font-size: .85rem;
+}
+.post-content code {
+  background: #1e1e1e; color: #B6F223; padding: .15rem .4rem;
+  font-size: .85rem; font-family: 'Courier New', monospace;
+}
+.post-content pre code { background: none; color: #e0e0e0; padding: 0; }
+.post-content hr { border: none; border-top: 1px solid #1e1e1e; margin: 2.5rem 0; }
+
+/* Post footer */
+.post-footer {
+  margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #1e1e1e;
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+}
+.post-share { display: flex; align-items: center; gap: .5rem; }
+.post-share span { font-size: .78rem; color: #555; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .08em; }
+.share-btn {
+  width: 36px; height: 36px; background: #161616; border: 1px solid #2a2a2a;
+  display: flex; align-items: center; justify-content: center;
+  text-decoration: none; color: #888; transition: all .2s;
+}
+.share-btn:hover { border-color: #B6F223; color: #B6F223; }
+.back-to-news {
+  display: inline-flex; align-items: center; gap: .4rem;
+  font-size: .82rem; color: #666; text-decoration: none;
+  font-weight: 600; transition: color .2s;
+}
+.back-to-news:hover { color: #B6F223; }
+
+/* Related posts */
+.related-section {
+  max-width: 1100px; margin: 0 auto; padding: 0 2rem 5rem;
+}
+.related-title {
+  font-size: 1.1rem; font-weight: 700; color: #fff;
+  margin-bottom: 1.5rem; padding-bottom: .75rem; border-bottom: 1px solid #1e1e1e;
+  display: flex; align-items: center; gap: .6rem;
+}
+.related-title::before { content: ''; display: block; width: 3px; height: 18px; background: #B6F223; }
+.related-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; }
+@media (max-width: 900px) { .related-grid { grid-template-columns: repeat(2,1fr); } }
+@media (max-width: 480px) { .related-grid { grid-template-columns: 1fr; } }
+.related-card {
+  background: #111; border: 1px solid #1e1e1e; text-decoration: none;
+  color: #fff; display: block; transition: border-color .2s; overflow: hidden;
+}
+.related-card:hover { border-color: #B6F223; }
+.related-card-img { aspect-ratio: 16/9; overflow: hidden; background: #0d0d0d; }
+.related-card-img img { width:100%; height:100%; object-fit:cover; transition:transform .4s; }
+.related-card:hover .related-card-img img { transform: scale(1.05); }
+.related-card-body { padding: .85rem; }
+.related-card-date { font-size: .68rem; color: #555; margin-bottom: .3rem; }
+.related-card-title {
+  font-size: .82rem; font-weight: 600; color: #e0e0e0; line-height: 1.35;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+
+/* Sidebar */
+.post-sidebar { position: sticky; top: 100px; }
+.sidebar-widget {
+  background: #111; border: 1px solid #1e1e1e; padding: 1.25rem; margin-bottom: 1.25rem;
+}
+.sidebar-widget-title {
+  font-size: .68rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .12em; color: #555; margin-bottom: 1rem;
+  padding-bottom: .75rem; border-bottom: 1px solid #1e1e1e;
+}
+/* Search */
+.sidebar-search-form { display: flex; }
+.sidebar-search-input {
+  flex: 1; background: #161616; border: 1px solid #2a2a2a; border-right: none;
+  color: #fff; padding: .6rem .85rem; font-size: .85rem; outline: none;
+}
+.sidebar-search-input:focus { border-color: #B6F223; }
+.sidebar-search-btn {
+  background: #B6F223; border: none; padding: 0 .9rem; cursor: pointer; flex-shrink: 0;
+}
+.sidebar-search-btn svg { display: block; }
+/* Recent posts */
+.sidebar-post { display: flex; gap: .75rem; padding: .75rem 0;
+  border-bottom: 1px solid #1a1a1a; text-decoration: none; }
+.sidebar-post:last-child { border-bottom: none; padding-bottom: 0; }
+.sidebar-post:first-child { padding-top: 0; }
+.sidebar-post-num {
+  font-size: .7rem; font-weight: 800; color: #B6F223;
+  min-width: 22px; padding-top: .1rem;
+}
+.sidebar-post-title {
+  font-size: .8rem; color: #ccc; line-height: 1.4; font-weight: 500;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+.sidebar-post-title:hover { color: #B6F223; }
+.sidebar-post-date { font-size: .7rem; color: #555; margin-top: .25rem; }
+/* CTA */
+.sidebar-cta {
+  background: linear-gradient(135deg, #B6F223 0%, #a0d91e 100%);
+  padding: 1.25rem; text-align: center;
+}
+.sidebar-cta h4 { font-size: .9rem; font-weight: 800; color: #0b0b0b; margin-bottom: .4rem; }
+.sidebar-cta p { font-size: .75rem; color: #2a3a00; margin-bottom: 1rem; line-height: 1.5; }
+.sidebar-cta-btn {
+  display: block; background: #0b0b0b; color: #B6F223; font-weight: 700;
+  padding: .6rem; font-size: .8rem; text-decoration: none; letter-spacing: .04em;
+  text-transform: uppercase; transition: opacity .2s;
+}
+.sidebar-cta-btn:hover { opacity: .85; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="post-page">
+
+  <!-- Hero -->
+  <div class="post-hero">
+    <div class="post-hero-inner">
+      <div class="breadcrumbs">
+        <a href="/">Home</a>
+        <span>›</span>
+        <a href="/news">News</a>
+        <span>›</span>
+        <span>{{ post.title }}</span>
+      </div>
+      <div class="post-meta-top">
+        {% if post.category %}
+        <span class="post-cat-badge">{{ post.category }}</span>
+        {% endif %}
+        <span class="post-date">
+          {{ (post.published_at or post.created_at).strftime('%B %d, %Y') if (post.published_at or post.created_at) }}
+        </span>
+        <span class="post-author-line">by <span>{{ post.author or 'Chipstock Team' }}</span></span>
+      </div>
+      <h1 class="post-hero-title">{{ post.title }}</h1>
+      {% if post.excerpt %}
+      <p class="post-excerpt">{{ post.excerpt }}</p>
+      {% endif %}
+      {% if post.tags %}
+      <div class="post-tags">
+        {% for tag in post.tags %}
+        <a href="/catalog?q={{ tag }}" class="post-tag"># {{ tag }}</a>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Featured image -->
+  {% if post.featured_image %}
+  <div class="post-featured-img">
+    <img src="{{ post.featured_image }}" alt="{{ post.title }}">
+  </div>
+  {% endif %}
+
+  <!-- Body -->
+  <div class="post-body-wrap">
+    <!-- Content -->
+    <article class="post-content">
+      {{ post.content|safe }}
+
+      <!-- Footer -->
+      <div class="post-footer">
+        <a href="/news" class="back-to-news">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+          Back to News
+        </a>
+        <div class="post-share">
+          <span>Share:</span>
+          <a class="share-btn" href="https://twitter.com/intent/tweet?url=https://chipstock.com/news/{{ post.slug }}&text={{ post.title|urlencode }}" target="_blank" rel="noopener" title="Share on X">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.257 5.625 5.907-5.625zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          </a>
+          <a class="share-btn" href="https://www.linkedin.com/sharing/share-offsite/?url=https://chipstock.com/news/{{ post.slug }}" target="_blank" rel="noopener" title="Share on LinkedIn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+          </a>
+        </div>
+      </div>
+    </article>
+
+    <!-- Sidebar -->
+    <aside class="post-sidebar">
+      <!-- Search -->
+      <div class="sidebar-widget">
+        <div class="sidebar-widget-title">Search Parts</div>
+        <form class="sidebar-search-form" action="/catalog" method="get">
+          <input class="sidebar-search-input" type="text" name="q" placeholder="Part number, manufacturer…">
+          <button class="sidebar-search-btn" type="submit">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0b0b0b" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </button>
+        </form>
+      </div>
+
+      <!-- Recent posts -->
+      {% if recent %}
+      <div class="sidebar-widget">
+        <div class="sidebar-widget-title">Recent Posts</div>
+        {% for r in recent %}
+        <a href="/news/{{ r.slug }}" class="sidebar-post">
+          <div class="sidebar-post-num">0{{ loop.index }}</div>
+          <div>
+            <div class="sidebar-post-title">{{ r.title }}</div>
+            <div class="sidebar-post-date">{{ (r.published_at or r.created_at).strftime('%b %d, %Y') if (r.published_at or r.created_at) }}</div>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <!-- CTA -->
+      <div class="sidebar-cta">
+        <h4>Need a Quote?</h4>
+        <p>Hard-to-find components sourced fast. Get pricing within 1 business day.</p>
+        <a href="#" class="sidebar-cta-btn" data-open-quote-modal>Request Quote →</a>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Related posts -->
+  {% if recent %}
+  <div class="related-section">
+    <div class="related-title">More Articles</div>
+    <div class="related-grid">
+      {% for r in recent %}
+      <a class="related-card" href="/news/{{ r.slug }}">
+        <div class="related-card-img">
+          {% if r.featured_image %}
+          <img src="{{ r.featured_image }}" alt="{{ r.title }}" loading="lazy">
+          {% else %}
+          <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#161616">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2a2a2a" stroke-width="1.2"><path d="M4 16l4-4 4 4 4-8 4 8"/><rect x="2" y="2" width="20" height="20" rx="2"/></svg>
+          </div>
+          {% endif %}
+        </div>
+        <div class="related-card-body">
+          <div class="related-card-date">{{ (r.published_at or r.created_at).strftime('%b %d, %Y') if (r.published_at or r.created_at) }}</div>
+          <div class="related-card-title">{{ r.title }}</div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

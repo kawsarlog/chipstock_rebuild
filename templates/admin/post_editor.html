@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ 'Edit Post' if post else 'New Post' }} — Chipstock Admin</title>
+<link rel="stylesheet" href="https://cdn.quilljs.com/1.3.7/quill.snow.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:#0b0b0b;color:#fff;font-family:'Inter',system-ui,sans-serif;min-height:100vh}
+.admin-layout{display:flex;min-height:100vh}
+/* Sidebar */
+.sidebar{width:220px;background:#111;border-right:1px solid #1e1e1e;
+  display:flex;flex-direction:column;padding:1.5rem 1rem;flex-shrink:0;position:sticky;top:0;height:100vh}
+.sidebar-logo{display:flex;align-items:center;gap:.5rem;margin-bottom:2rem}
+.sidebar-logo img{height:28px}
+.sidebar a{display:flex;align-items:center;gap:.6rem;padding:.6rem .75rem;color:#aaa;
+  text-decoration:none;font-size:.875rem;border-radius:4px;transition:all .15s;margin-bottom:.15rem}
+.sidebar a:hover,.sidebar a.active{background:#1e1e1e;color:#fff}
+.sidebar a svg{width:16px;height:16px;flex-shrink:0}
+.sidebar-footer{margin-top:auto}
+/* Main */
+.main{flex:1;padding:2rem;max-width:1100px}
+.topbar{display:flex;align-items:center;gap:1rem;margin-bottom:2rem}
+.back-btn{color:#888;text-decoration:none;font-size:.875rem;display:flex;align-items:center;gap:.3rem}
+.back-btn:hover{color:#fff}
+.topbar h1{font-size:1.4rem;font-weight:700;flex:1}
+.editor-layout{display:grid;grid-template-columns:1fr 300px;gap:1.5rem;align-items:start}
+/* Form elements */
+.card{background:#111;border:1px solid #1e1e1e;padding:1.5rem;margin-bottom:1.5rem}
+.card-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;
+  color:#666;margin-bottom:1rem;padding-bottom:.75rem;border-bottom:1px solid #1e1e1e}
+label{display:block;font-size:.75rem;font-weight:600;color:#888;
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:.4rem;margin-top:1rem}
+label:first-of-type{margin-top:0}
+input[type=text],input[type=url],textarea,select{width:100%;background:#161616;
+  border:1px solid #2a2a2a;color:#fff;padding:.65rem .85rem;font-size:.875rem;
+  outline:none;font-family:inherit;transition:border .2s;resize:vertical}
+input:focus,textarea:focus,select:focus{border-color:#B6F223}
+select option{background:#111}
+textarea{min-height:80px}
+.input-hint{font-size:.72rem;color:#555;margin-top:.3rem}
+/* Quill editor */
+.editor-wrap{background:#111;border:1px solid #1e1e1e;margin-bottom:1.5rem}
+.editor-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;
+  color:#666;padding:1rem 1.5rem .75rem;border-bottom:1px solid #1e1e1e}
+.ql-toolbar.ql-snow{border:none!important;border-bottom:1px solid #2a2a2a!important;
+  background:#161616;padding:.6rem 1rem}
+.ql-container.ql-snow{border:none!important;min-height:420px;font-size:16px}
+.ql-editor{min-height:420px;color:#e0e0e0;padding:1.25rem 1.5rem;line-height:1.75}
+.ql-editor p{margin-bottom:.75em}
+.ql-editor h1,.ql-editor h2,.ql-editor h3{color:#fff;margin-bottom:.5em;margin-top:1em}
+.ql-snow .ql-stroke{stroke:#aaa!important}
+.ql-snow .ql-fill{fill:#aaa!important}
+.ql-snow .ql-picker{color:#aaa!important}
+.ql-snow .ql-picker-options{background:#1e1e1e!important;border-color:#2a2a2a!important}
+.ql-snow .ql-picker-item{color:#ccc!important}
+.ql-snow .ql-picker-item:hover,.ql-snow .ql-picker-item.ql-selected{color:#B6F223!important}
+.ql-toolbar button:hover .ql-stroke,.ql-toolbar button.ql-active .ql-stroke{stroke:#B6F223!important}
+.ql-toolbar button:hover .ql-fill,.ql-toolbar button.ql-active .ql-fill{fill:#B6F223!important}
+.ql-toolbar button:hover,.ql-toolbar button.ql-active{color:#B6F223!important}
+.ql-snow .ql-tooltip{background:#1e1e1e!important;border-color:#2a2a2a!important;color:#fff!important}
+.ql-snow .ql-tooltip input[type=text]{background:#111!important;color:#fff!important;border-color:#2a2a2a!important}
+/* Status & Publish */
+.status-row{display:flex;gap:.75rem;align-items:center}
+.btn-draft,.btn-publish{flex:1;padding:.7rem;font-size:.85rem;font-weight:700;
+  border:none;cursor:pointer;letter-spacing:.02em;transition:all .2s}
+.btn-draft{background:#1e1e1e;color:#aaa;border:1px solid #2a2a2a}
+.btn-draft:hover{border-color:#555;color:#fff}
+.btn-publish{background:#B6F223;color:#0b0b0b}
+.btn-publish:hover{opacity:.85}
+/* Image upload */
+.img-preview{width:100%;aspect-ratio:16/9;background:#161616;border:1px dashed #2a2a2a;
+  display:flex;align-items:center;justify-content:center;margin-bottom:.75rem;overflow:hidden;position:relative}
+.img-preview img{width:100%;height:100%;object-fit:cover}
+.img-preview-placeholder{color:#555;font-size:.8rem;text-align:center}
+.upload-btn{width:100%;padding:.6rem;background:#1a1a1a;border:1px solid #2a2a2a;
+  color:#aaa;font-size:.8rem;cursor:pointer;font-family:inherit;transition:all .2s;text-align:center}
+.upload-btn:hover{border-color:#555;color:#fff}
+.upload-progress{display:none;font-size:.75rem;color:#B6F223;margin-top:.3rem}
+/* Tags */
+.tags-input-wrap{position:relative}
+/* Flash */
+.flash{background:rgba(182,242,35,.12);border:1px solid rgba(182,242,35,.3);
+  color:#B6F223;padding:.75rem 1rem;font-size:.875rem;margin-bottom:1.5rem}
+/* SEO preview */
+.seo-preview{background:#161616;border:1px solid #1e1e1e;padding:1rem;margin-top:.75rem}
+.seo-prev-url{font-size:.75rem;color:#4caf50;margin-bottom:.3rem}
+.seo-prev-title{font-size:1rem;color:#8ab4f8;font-weight:500;line-height:1.3;margin-bottom:.3rem}
+.seo-prev-desc{font-size:.8rem;color:#bbb;line-height:1.5}
+/* Char counter */
+.char-counter{font-size:.7rem;color:#555;text-align:right;margin-top:.25rem}
+.char-counter.warn{color:#ff9800}
+.char-counter.over{color:#f44336}
+</style>
+</head>
+<body>
+<div class="admin-layout">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <img src="/static/uploads/2025/05/logo.webp" alt="Chipstock">
+    </div>
+    <a href="/admin/posts" class="active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Blog Posts
+    </a>
+    <a href="/news" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      View Blog
+    </a>
+    <div class="sidebar-footer">
+      <a href="/admin/logout">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Logout
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <div class="topbar">
+      <a href="/admin/posts" class="back-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        All Posts
+      </a>
+      <h1>{{ 'Edit Post' if post else 'New Post' }}</h1>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}{% for cat, msg in messages %}
+    <div class="flash">{{ msg }}</div>
+    {% endfor %}{% endif %}
+    {% endwith %}
+
+    <form method="post" id="post-form">
+      <input type="hidden" name="content" id="content-input">
+      <input type="hidden" name="status" id="status-input" value="{{ post.status if post else 'draft' }}">
+
+      <!-- Title -->
+      <div style="margin-bottom:1.25rem">
+        <input type="text" name="title" id="title-input" placeholder="Post title…"
+          value="{{ post.title if post else '' }}" required
+          style="width:100%;background:#111;border:1px solid #1e1e1e;color:#fff;
+            padding:1rem 1.25rem;font-size:1.5rem;font-weight:700;outline:none;
+            font-family:inherit;transition:border .2s"
+          onfocus="this.style.borderColor='#B6F223'" onblur="this.style.borderColor='#1e1e1e'">
+      </div>
+
+      <div class="editor-layout">
+        <!-- Left: Content -->
+        <div>
+          <!-- Rich Editor -->
+          <div class="editor-wrap">
+            <div class="editor-label">Content</div>
+            <div id="quill-editor">{{ post.content|safe if post and post.content else '' }}</div>
+          </div>
+
+          <!-- Excerpt -->
+          <div class="card">
+            <div class="card-title">Excerpt</div>
+            <textarea name="excerpt" id="excerpt-input" rows="3"
+              placeholder="Short summary shown on blog listing page…">{{ post.excerpt if post else '' }}</textarea>
+            <div class="char-counter" id="excerpt-counter">0 / 200</div>
+          </div>
+
+          <!-- SEO -->
+          <div class="card">
+            <div class="card-title">SEO Settings</div>
+            <label>SEO Title</label>
+            <input type="text" name="seo_title" id="seo-title"
+              value="{{ post.seo_title if post else '' }}"
+              placeholder="Leave blank to use post title">
+            <div class="char-counter" id="seo-title-counter">0 / 60</div>
+
+            <label>Meta Description</label>
+            <textarea name="seo_description" id="seo-desc" rows="3"
+              placeholder="Shown in Google search results (150–160 chars recommended)">{{ post.seo_description if post else '' }}</textarea>
+            <div class="char-counter" id="seo-desc-counter">0 / 160</div>
+
+            <label>SEO Preview</label>
+            <div class="seo-preview">
+              <div class="seo-prev-url">chipstock.com › news › <span id="prev-slug">your-post-slug</span></div>
+              <div class="seo-prev-title" id="prev-title">Post Title</div>
+              <div class="seo-prev-desc" id="prev-desc">Meta description will appear here…</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Sidebar -->
+        <div>
+          <!-- Publish -->
+          <div class="card">
+            <div class="card-title">Publish</div>
+            <div class="status-row">
+              <button type="button" class="btn-draft" onclick="submitForm('draft')">Save Draft</button>
+              <button type="button" class="btn-publish" onclick="submitForm('published')">
+                {{ 'Update' if post else 'Publish' }}
+              </button>
+            </div>
+            <div style="margin-top:.75rem;font-size:.75rem;color:#555">
+              Status: <span id="cur-status" style="color:#aaa">{{ post.status|title if post else 'Draft' }}</span>
+            </div>
+          </div>
+
+          <!-- Featured Image -->
+          <div class="card">
+            <div class="card-title">Featured Image</div>
+            <div class="img-preview" id="img-preview">
+              {% if post and post.featured_image %}
+              <img src="{{ post.featured_image }}" id="preview-img" alt="">
+              {% else %}
+              <div class="img-preview-placeholder">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#444" stroke-width="1.5" style="margin-bottom:.5rem;display:block;margin-left:auto;margin-right:auto"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                No image selected
+              </div>
+              {% endif %}
+            </div>
+            <label style="cursor:pointer">
+              <div class="upload-btn" onclick="document.getElementById('img-file').click()">
+                ↑ Upload Image
+              </div>
+              <input type="file" id="img-file" accept="image/*" style="display:none" onchange="uploadImage(this)">
+            </label>
+            <div class="upload-progress" id="upload-progress">Uploading…</div>
+            <label style="margin-top:.75rem">Or enter image URL</label>
+            <input type="url" name="featured_image" id="feat-img-url"
+              value="{{ post.featured_image if post else '' }}"
+              placeholder="https://…" oninput="previewFromUrl(this.value)">
+          </div>
+
+          <!-- Category & Tags -->
+          <div class="card">
+            <div class="card-title">Organization</div>
+            <label>Category</label>
+            <select name="category">
+              <option value="">— Select Category —</option>
+              {% set cats = ['Industry News','Component Sourcing','Supply Chain','Technology','Company Updates','Semiconductors','Hard Drives & Storage','Memory & RAM','Processors'] %}
+              {% for c in cats %}
+              <option value="{{ c }}" {{ 'selected' if post and post.category == c else '' }}>{{ c }}</option>
+              {% endfor %}
+            </select>
+
+            <label>Tags</label>
+            <input type="text" name="tags" id="tags-input"
+              value="{{ post.tags|join(', ') if post and post.tags else '' }}"
+              placeholder="chip shortage, sourcing, electronics">
+            <div class="input-hint">Separate tags with commas</div>
+
+            <label>Author</label>
+            <input type="text" name="author"
+              value="{{ post.author if post else 'Chipstock Team' }}">
+          </div>
+
+          <!-- Slug -->
+          <div class="card">
+            <div class="card-title">URL Slug</div>
+            <input type="text" name="slug" id="slug-input"
+              value="{{ post.slug if post else '' }}"
+              placeholder="my-post-slug" required>
+            <div class="input-hint">chipstock.com/news/<span id="slug-preview" style="color:#B6F223">{{ post.slug if post else 'slug' }}</span></div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </main>
+</div>
+
+<script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+<script>
+// ── Quill setup ───────────────────────────────────────────────────────────────
+const quill = new Quill('#quill-editor', {
+  theme: 'snow',
+  placeholder: 'Start writing your post…',
+  modules: {
+    toolbar: [
+      [{ header: [1, 2, 3, 4, false] }],
+      [{ font: [] }, { size: ['small', false, 'large', 'huge'] }],
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ color: [] }, { background: [] }],
+      [{ align: [] }],
+      [{ list: 'ordered' }, { list: 'bullet' }],
+      [{ indent: '-1' }, { indent: '+1' }],
+      ['blockquote', 'code-block'],
+      ['link', 'image'],
+      ['clean'],
+    ]
+  }
+});
+
+// Custom image handler — upload to server
+quill.getModule('toolbar').addHandler('image', () => {
+  const inp = document.createElement('input');
+  inp.type = 'file';
+  inp.accept = 'image/*';
+  inp.onchange = async () => {
+    const fd = new FormData();
+    fd.append('image', inp.files[0]);
+    const r = await fetch('/admin/upload-image', { method: 'POST', body: fd });
+    const d = await r.json();
+    if (d.url) {
+      const range = quill.getSelection();
+      quill.insertEmbed(range ? range.index : 0, 'image', d.url);
+    }
+  };
+  inp.click();
+});
+
+// ── Auto-slug from title ───────────────────────────────────────────────────────
+const titleInp = document.getElementById('title-input');
+const slugInp  = document.getElementById('slug-input');
+const slugPrev = document.getElementById('slug-preview');
+const prevSlug = document.getElementById('prev-slug');
+const prevTitle = document.getElementById('prev-title');
+const prevDesc  = document.getElementById('prev-desc');
+
+function toSlug(s) {
+  return s.toLowerCase().trim()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-').slice(0, 80);
+}
+
+{% if not post %}
+titleInp.addEventListener('input', () => {
+  const s = toSlug(titleInp.value);
+  slugInp.value = s;
+  slugPrev.textContent = s || 'slug';
+  prevSlug.textContent = s || 'slug';
+  prevTitle.textContent = titleInp.value || 'Post Title';
+});
+{% else %}
+titleInp.addEventListener('input', () => {
+  prevTitle.textContent = titleInp.value || 'Post Title';
+});
+{% endif %}
+
+slugInp.addEventListener('input', () => {
+  slugPrev.textContent = slugInp.value || 'slug';
+  prevSlug.textContent = slugInp.value || 'slug';
+});
+
+// ── SEO preview live update ────────────────────────────────────────────────────
+const seoTitle = document.getElementById('seo-title');
+const seoDesc  = document.getElementById('seo-desc');
+
+seoTitle.addEventListener('input', () => {
+  prevTitle.textContent = seoTitle.value || titleInp.value || 'Post Title';
+  updateCounter('seo-title-counter', seoTitle.value, 60);
+});
+seoDesc.addEventListener('input', () => {
+  prevDesc.textContent = seoDesc.value || 'Meta description will appear here…';
+  updateCounter('seo-desc-counter', seoDesc.value, 160);
+});
+
+// init preview
+prevTitle.textContent = seoTitle.value || titleInp.value || 'Post Title';
+prevDesc.textContent  = seoDesc.value || 'Meta description will appear here…';
+prevSlug.textContent  = slugInp.value || 'slug';
+
+// ── Char counters ──────────────────────────────────────────────────────────────
+function updateCounter(id, val, max) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const len = val.length;
+  el.textContent = `${len} / ${max}`;
+  el.className = 'char-counter' + (len > max ? ' over' : len > max * 0.85 ? ' warn' : '');
+}
+
+const excerptInp = document.getElementById('excerpt-input');
+excerptInp.addEventListener('input', () => updateCounter('excerpt-counter', excerptInp.value, 200));
+seoTitle.addEventListener('input', () => updateCounter('seo-title-counter', seoTitle.value, 60));
+seoDesc.addEventListener('input',  () => updateCounter('seo-desc-counter', seoDesc.value, 160));
+// init
+updateCounter('excerpt-counter', excerptInp.value, 200);
+updateCounter('seo-title-counter', seoTitle.value, 60);
+updateCounter('seo-desc-counter', seoDesc.value, 160);
+
+// ── Featured image upload ──────────────────────────────────────────────────────
+async function uploadImage(inp) {
+  const prog = document.getElementById('upload-progress');
+  prog.style.display = 'block';
+  const fd = new FormData();
+  fd.append('image', inp.files[0]);
+  try {
+    const r = await fetch('/admin/upload-image', { method: 'POST', body: fd });
+    const d = await r.json();
+    if (d.url) {
+      document.getElementById('feat-img-url').value = d.url;
+      previewFromUrl(d.url);
+    }
+  } finally {
+    prog.style.display = 'none';
+  }
+}
+
+function previewFromUrl(url) {
+  const wrap = document.getElementById('img-preview');
+  if (!url) {
+    wrap.innerHTML = '<div class="img-preview-placeholder">No image selected</div>';
+    return;
+  }
+  wrap.innerHTML = `<img src="${url}" style="width:100%;height:100%;object-fit:cover" alt="">`;
+}
+
+// ── Submit ─────────────────────────────────────────────────────────────────────
+function submitForm(status) {
+  document.getElementById('content-input').value = quill.root.innerHTML;
+  document.getElementById('status-input').value = status;
+  document.getElementById('cur-status').textContent = status.charAt(0).toUpperCase() + status.slice(1);
+  document.getElementById('post-form').submit();
+}
+</script>
+</body>
+</html>
