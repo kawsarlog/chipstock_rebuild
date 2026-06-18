@@ -353,6 +353,23 @@
 .cs-quote-direct a { color: #B6F223; }
 body.cs-modal-open { overflow: hidden; }
 
+/* ── "Delivering without compromise." — lime highlight ── */
+body .bottom_section_title .border { color: #B6F223 !important; border-color: rgba(182,242,35,.5) !important; }
+
+/* ── Button hover — keep text dark (overrides main.css lime-on-hover) ── */
+.header_link .main_button_basic.button_basic:hover,
+.footer_link .main_button_basic.button_basic:hover,
+.header_mob_link .main_button_basic.button_basic:hover { color: #0a0a0a !important; }
+
+/* ── Service cards — all text white, title stays visible on hover ── */
+.home_page .third_item .third_item_title,
+.home_page .third_item .third_item_title p,
+.home_page .third_item .third_item_text,
+.home_page .third_item .third_item_text p { color: #fff !important; }
+
+/* Keep title visible on hover (override main.css opacity:0 rule) */
+.home_page .third_item:hover .third_item_title { opacity: 1 !important; }
+
 /* ── Article sidebar ── */
 .single_news_page .article_wrap { max-width: 1300px !important; }
 

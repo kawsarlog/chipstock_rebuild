@@ -7,6 +7,7 @@ DB:  vyrian_db @ localhost:5432 (postgres / no password) — public.products tab
 from __future__ import annotations
 
 import base64
+import datetime
 import html as _html
 import json
 import math
@@ -15,7 +16,7 @@ import re
 import urllib.error
 import urllib.request
 from email.utils import parseaddr
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Generator, List, Optional, Tuple
 from urllib.parse import urlparse
 
 import psycopg2
@@ -577,6 +578,136 @@ def request_quote():
 @app.route("/thank-you")
 def thank_you():
     return render_template("thank_you.html")
+
+
+# ── Sitemap ──────────────────────────────────────────────────────────────────
+
+SITE_BASE      = "https://chipstock.com"
+SITEMAP_CHUNK  = 50_000   # max URLs per sitemap file (Google limit: 50k)
+
+_STATIC_PAGES: List[Tuple[str, str, str]] = [
+    ("/",                                                    "1.0", "weekly"),
+    ("/catalog",                                             "0.9", "daily"),
+    ("/services",                                            "0.8", "monthly"),
+    ("/about",                                               "0.7", "monthly"),
+    ("/quality",                                             "0.7", "monthly"),
+    ("/products",                                            "0.8", "monthly"),
+    ("/news",                                                "0.7", "weekly"),
+    ("/contact",                                             "0.7", "monthly"),
+    ("/services/excess-inventory-management",                "0.7", "monthly"),
+    ("/news/chip-stock-named-2025-top-north-american-independent-distributors", "0.6", "monthly"),
+    ("/news/chip-stock-top-electronic-component-distributor-semiconductor-review", "0.6", "monthly"),
+    ("/news/chip-stock-named-top-20-global-independent-distributor-electronics-sourcing", "0.6", "monthly"),
+]
+
+
+@app.route("/robots.txt")
+def robots_txt():
+    body = (
+        "User-agent: *\n"
+        "Allow: /\n"
+        "Disallow: /catalog-img/\n"
+        "Disallow: /api/\n"
+        f"\nSitemap: {SITE_BASE}/sitemap.xml\n"
+    )
+    return Response(body, mimetype="text/plain")
+
+
+@app.route("/sitemap.xml")
+def sitemap_index():
+    db = _conn()
+    try:
+        with db.cursor() as cur:
+            cur.execute("SELECT COUNT(*) FROM public.products")
+            total: int = cur.fetchone()[0]
+    finally:
+        db.close()
+
+    num_chunks = math.ceil(total / SITEMAP_CHUNK)
+    today = datetime.date.today().isoformat()
+
+    lines = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+        f'  <sitemap><loc>{SITE_BASE}/sitemap-pages.xml</loc><lastmod>{today}</lastmod></sitemap>',
+    ]
+    for i in range(1, num_chunks + 1):
+        lines.append(
+            f'  <sitemap><loc>{SITE_BASE}/sitemap-products-{i}.xml</loc>'
+            f'<lastmod>{today}</lastmod></sitemap>'
+        )
+    lines.append('</sitemapindex>')
+    return Response("\n".join(lines), mimetype="application/xml")
+
+
+@app.route("/sitemap-pages.xml")
+def sitemap_pages():
+    today = datetime.date.today().isoformat()
+    lines = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+    ]
+    for path, priority, changefreq in _STATIC_PAGES:
+        loc = _html.escape(f"{SITE_BASE}{path}")
+        lines.append(
+            f'  <url><loc>{loc}</loc><lastmod>{today}</lastmod>'
+            f'<changefreq>{changefreq}</changefreq><priority>{priority}</priority></url>'
+        )
+    lines.append('</urlset>')
+    return Response("\n".join(lines), mimetype="application/xml")
+
+
+@app.route("/sitemap-products-<int:chunk>.xml")
+def sitemap_products(chunk: int):
+    if chunk < 1:
+        abort(404)
+    offset = (chunk - 1) * SITEMAP_CHUNK
+
+    def _generate() -> Generator[str, None, None]:
+        yield '<?xml version="1.0" encoding="UTF-8"?>\n'
+        yield '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+        db = _conn()
+        try:
+            with db.cursor("sitemap_cursor") as cur:  # server-side cursor
+                cur.execute(
+                    """SELECT product_id, updated_at FROM public.products
+                       ORDER BY product_id
+                       LIMIT %s OFFSET %s""",
+                    (SITEMAP_CHUNK, offset),
+                )
+                while True:
+                    rows = cur.fetchmany(5000)
+                    if not rows:
+                        break
+                    for pid, updated_at in rows:
+                        safe_pid = _html.escape(str(pid))
+                        loc = f"{SITE_BASE}/catalog/{safe_pid}"
+                        lastmod = (
+                            f"<lastmod>{updated_at.date().isoformat()}</lastmod>"
+                            if updated_at else ""
+                        )
+                        yield (
+                            f"  <url><loc>{loc}</loc>{lastmod}"
+                            f"<changefreq>monthly</changefreq>"
+                            f"<priority>0.5</priority></url>\n"
+                        )
+        finally:
+            db.close()
+        yield '</urlset>\n'
+
+    # Check chunk exists (quick count check)
+    db2 = _conn()
+    try:
+        with db2.cursor() as cur:
+            cur.execute("SELECT COUNT(*) FROM public.products")
+            total = cur.fetchone()[0]
+    finally:
+        db2.close()
+
+    if offset >= total:
+        abort(404)
+
+    return Response(_generate(), mimetype="application/xml")
 
 
 if __name__ == "__main__":

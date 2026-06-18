@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}Chipstock{% endblock %}</title>
     <link rel="profile" href="https://gmpg.org/xfn/11">
+    <link rel="icon" href="https://chipstock.com/wp-content/uploads/2025/04/cropped-chipstock-32x32.png" sizes="32x32">
+    <link rel="icon" href="https://chipstock.com/wp-content/uploads/2025/04/cropped-chipstock-192x192.png" sizes="192x192">
+    <link rel="apple-touch-icon" href="https://chipstock.com/wp-content/uploads/2025/04/cropped-chipstock-180x180.png">
 
     <!-- CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
@@ -112,7 +115,7 @@
                         <p>201 W Morehead St, Charlotte, NC 28202</p>
                     </div>
                     <div class="footer_link">
-                        <a class="button_basic" href="/contact">Request Quote</a>
+                        <a class="main_button_basic button_basic" href="/contact"><span class="button_basic_label">Request Quote</span></a>
                     </div>
                 </div>
             </div>

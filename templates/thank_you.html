@@ -2,24 +2,286 @@
 {% block title %}Thank You — Chipstock{% endblock %}
 
 {% block content %}
-<main class="thankyou-page">
-  <div class="wrap">
-    <div class="thankyou-box">
-      <div class="thankyou-icon">
-        <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
-          <circle cx="28" cy="28" r="27" stroke="#B6F223" stroke-width="2"/>
-          <path d="M16 28L24 36L40 20" stroke="#B6F223" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+<div class="ty-page">
+
+  <!-- Animated background grid -->
+  <div class="ty-bg-grid" aria-hidden="true"></div>
+
+  <!-- Floating accent orbs -->
+  <div class="ty-orb ty-orb--1" aria-hidden="true"></div>
+  <div class="ty-orb ty-orb--2" aria-hidden="true"></div>
+
+  <div class="ty-card">
+
+    <!-- Success icon -->
+    <div class="ty-icon-wrap" aria-hidden="true">
+      <svg class="ty-check-ring" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle class="ty-ring-track" cx="60" cy="60" r="54" stroke="rgba(196,255,34,0.15)" stroke-width="4"/>
+        <circle class="ty-ring-fill" cx="60" cy="60" r="54" stroke="#c4ff22" stroke-width="4"
+                stroke-linecap="round" stroke-dasharray="339.3" stroke-dashoffset="339.3"/>
+      </svg>
+      <svg class="ty-check-mark" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <polyline class="ty-checkmark" points="10,26 21,37 38,14" stroke="#c4ff22" stroke-width="4"
+                  stroke-linecap="round" stroke-linejoin="round"
+                  stroke-dasharray="50" stroke-dashoffset="50"/>
+      </svg>
+    </div>
+
+    <!-- Label chip -->
+    <div class="ty-chip">Quote Request Received</div>
+
+    <!-- Heading -->
+    <h1 class="ty-heading">Thank You!</h1>
+
+    <!-- Subtext -->
+    <p class="ty-sub">
+      Your request has been submitted successfully.<br>
+      Our team will respond with <strong>pricing and availability</strong> within 1 business day.
+    </p>
+
+    <!-- Info cards -->
+    <div class="ty-info-grid">
+      <div class="ty-info-card">
+        <svg class="ty-info-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/>
+          <path d="M12 7v5l3 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
+        <div>
+          <div class="ty-info-label">Response Time</div>
+          <div class="ty-info-value">Within 1 business day</div>
+        </div>
       </div>
-      <h1 class="thankyou-title">Request Received!</h1>
-      <p class="thankyou-text">Thank you for your quote request. Our team will review your inquiry and respond within 1 business day with pricing and availability.</p>
-      <div class="thankyou-actions">
-        <a href="/catalog" class="main_button_basic button_basic">Browse More Products</a>
-        <a href="/" class="link_basic" style="margin-left:1.5rem">Back to Home
-          <svg class="link-arrow" width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 9H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M10 3L16 9L10 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </a>
+      <div class="ty-info-card">
+        <svg class="ty-info-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.8"/>
+          <path d="M3 9l9 6 9-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+        <div>
+          <div class="ty-info-label">Direct Contact</div>
+          <div class="ty-info-value">rfq@chip-stock.com</div>
+        </div>
       </div>
     </div>
+
+    <!-- Divider -->
+    <div class="ty-divider" aria-hidden="true">
+      <span></span><span class="ty-divider-dot"></span><span></span>
+    </div>
+
+    <!-- CTA buttons -->
+    <div class="ty-actions">
+      <a href="/catalog" class="ty-btn ty-btn--primary">
+        <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M3 10h14M3 10l5-5M3 10l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Browse Catalog
+      </a>
+      <a href="/" class="ty-btn ty-btn--ghost">
+        Back to Home
+        <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M17 10H3m14 0l-5-5m5 5l-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+    </div>
+
   </div>
-</main>
+
+</div>
+
+<style>
+/* ── Thank You Page ── */
+.ty-page {
+  position: relative;
+  min-height: calc(100vh - 80px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(2rem, 6vw, 5rem) clamp(1rem, 3vw, 2.5rem);
+  overflow: hidden;
+  background: #0B0B0B;
+}
+
+/* Background grid */
+.ty-bg-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(196,255,34,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(196,255,34,0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+}
+
+/* Orbs */
+.ty-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+}
+.ty-orb--1 {
+  width: 420px; height: 420px;
+  top: -80px; right: -120px;
+  background: radial-gradient(circle, rgba(196,255,34,0.10) 0%, transparent 70%);
+  animation: orbFloat 8s ease-in-out infinite;
+}
+.ty-orb--2 {
+  width: 320px; height: 320px;
+  bottom: -60px; left: -80px;
+  background: radial-gradient(circle, rgba(196,255,34,0.07) 0%, transparent 70%);
+  animation: orbFloat 10s ease-in-out infinite reverse;
+}
+@keyframes orbFloat {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-24px); }
+}
+
+/* Card */
+.ty-card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 560px;
+  background: #0d0d0d;
+  border: 1px solid rgba(255,255,255,0.09);
+  padding: clamp(2rem, 5vw, 3.5rem) clamp(1.5rem, 4vw, 3rem);
+  text-align: center;
+  animation: cardIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(32px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Icon */
+.ty-icon-wrap {
+  position: relative;
+  width: 120px; height: 120px;
+  margin: 0 auto 1.75rem;
+}
+.ty-check-ring, .ty-check-mark {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+}
+.ty-ring-fill {
+  animation: ringDraw 0.7s 0.2s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+@keyframes ringDraw { to { stroke-dashoffset: 0; } }
+.ty-checkmark {
+  animation: checkDraw 0.45s 0.75s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+@keyframes checkDraw { to { stroke-dashoffset: 0; } }
+
+/* Chip */
+.ty-chip {
+  display: inline-block;
+  padding: 0.3rem 0.9rem;
+  border: 1px solid rgba(196,255,34,0.5);
+  background: rgba(196,255,34,0.12);
+  color: #c4ff22;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+  animation: fadeUp 0.5s 0.4s both;
+}
+
+/* Heading */
+.ty-heading {
+  font-size: clamp(2.2rem, 6vw, 3.2rem);
+  font-weight: 800;
+  line-height: 1.1;
+  color: #fff;
+  margin: 0 0 1rem;
+  animation: fadeUp 0.5s 0.5s both;
+}
+
+/* Subtext */
+.ty-sub {
+  color: #b8b8b8;
+  font-size: 1rem;
+  line-height: 1.65;
+  margin: 0 0 2rem;
+  animation: fadeUp 0.5s 0.6s both;
+}
+.ty-sub strong { color: #eaeaea; }
+
+/* Info grid */
+.ty-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+  animation: fadeUp 0.5s 0.65s both;
+}
+@media (max-width: 440px) { .ty-info-grid { grid-template-columns: 1fr; } }
+
+.ty-info-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  background: #141414;
+  border: 1px solid rgba(255,255,255,0.09);
+  padding: 0.85rem 1rem;
+  text-align: left;
+}
+.ty-info-icon {
+  width: 20px; height: 20px;
+  color: #c4ff22;
+  flex-shrink: 0; margin-top: 1px;
+}
+.ty-info-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #b8b8b8;
+  margin-bottom: 0.2rem;
+}
+.ty-info-value { font-size: 0.85rem; color: #fff; font-weight: 500; }
+
+/* Divider */
+.ty-divider {
+  display: flex; align-items: center; gap: 0.6rem;
+  margin-bottom: 2rem;
+  animation: fadeUp 0.5s 0.7s both;
+}
+.ty-divider span:not(.ty-divider-dot) {
+  flex: 1; height: 1px;
+  background: rgba(255,255,255,0.09);
+}
+.ty-divider-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: #c4ff22;
+  flex-shrink: 0;
+}
+
+/* Buttons */
+.ty-actions {
+  display: flex; gap: 0.75rem;
+  flex-wrap: wrap; justify-content: center;
+  animation: fadeUp 0.5s 0.75s both;
+}
+.ty-btn {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.9rem; font-weight: 700;
+  letter-spacing: 0.03em;
+  text-decoration: none;
+  transition: opacity 0.18s, transform 0.18s;
+  font-family: inherit;
+}
+.ty-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+.ty-btn:hover { opacity: 0.85; transform: translateY(-2px); text-decoration: none; }
+.ty-btn--primary { background: #B6F223; color: #0B0B0B; border: 1px solid #B6F223; }
+.ty-btn--ghost { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.2); }
+.ty-btn--ghost:hover { border-color: rgba(196,255,34,0.5); color: #c4ff22; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+</style>
 {% endblock %}
