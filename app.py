@@ -673,13 +673,69 @@ def contact():
 
 @app.route("/contact/submit", methods=["POST"])
 def contact_submit():
-    flash("Thank you! We will get back to you shortly.", "success")
-    return redirect(url_for("contact"))
+    f = request.form
+    name = (f.get("name") or "").strip()
+    email = (f.get("email") or "").strip()
+    if not name or not _valid_email(email):
+        flash("Please provide your name and a valid email address.", "error")
+        return redirect(request.referrer or url_for("contact"))
+
+    company = (f.get("company") or "").strip()
+    msg = (f.get("message") or "").strip()
+    if company:
+        msg = f"Company: {company}\n\n{msg}" if msg else f"Company: {company}"
+
+    payload = {
+        "name":         name,
+        "phone":        (f.get("phone") or "").strip(),
+        "email":        email,
+        "quantity":     (f.get("quantity") or "").strip(),
+        "part_number":  (f.get("part_number") or "").strip(),
+        "message":      msg or "(Contact / quote request — no message provided)",
+        "product_name": "Contact / Quote Request",
+        "page_url":     request.referrer or "",
+    }
+    ok, _err = _send_brevo(payload)
+    if ok:
+        flash("Thank you! We will get back to you shortly.", "success")
+    else:
+        flash("Sorry, we couldn't send your request right now. Please email rfq@chip-stock.com directly.", "error")
+    return redirect(request.referrer or url_for("contact"))
 
 
 @app.route("/excess/submit", methods=["POST"])
 def excess_submit():
-    flash("Thank you! We will review your inventory list and get back to you shortly.", "success")
+    f = request.form
+    name = (f.get("name") or "").strip()
+    email = (f.get("email") or "").strip()
+    if not name or not _valid_email(email):
+        flash("Please provide your name and a valid email address.", "error")
+        return redirect(url_for("excess"))
+
+    company = (f.get("company") or "").strip()
+    lines = []
+    if company:
+        lines.append(f"Company: {company}")
+    csv_file = request.files.get("csv_file")
+    if csv_file and csv_file.filename:
+        lines.append(f"CSV uploaded: {secure_filename(csv_file.filename)}")
+    lines.append("Excess inventory offer submitted via website form.")
+
+    payload = {
+        "name":         name,
+        "phone":        (f.get("phone") or "").strip(),
+        "email":        email,
+        "quantity":     (f.get("quantity") or "").strip(),
+        "part_number":  (f.get("part_number") or "").strip(),
+        "message":      "\n".join(lines),
+        "product_name": "Excess Inventory Offer",
+        "page_url":     request.referrer or "",
+    }
+    ok, _err = _send_brevo(payload)
+    if ok:
+        flash("Thank you! We will review your inventory list and get back to you shortly.", "success")
+    else:
+        flash("Sorry, we couldn't send your request right now. Please email rfq@chip-stock.com directly.", "error")
     return redirect(url_for("excess"))
 
 
