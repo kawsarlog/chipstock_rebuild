@@ -60,13 +60,10 @@
   <section class="news-hero">
     <div class="news-hero-chip">Insights & Updates</div>
     <h1>News & <span>Blog</span></h1>
-    <p>Industry insights, company updates, and expert guidance on electronic component sourcing.</p>
+    <p>Company milestones, industry insights, and expert guidance on electronic component sourcing.</p>
     <div class="news-cats">
-      <a href="/news" class="news-cat active">All Posts</a>
-      <a href="/news?cat=Industry+News" class="news-cat">Industry News</a>
-      <a href="/news?cat=Component+Sourcing" class="news-cat">Component Sourcing</a>
-      <a href="/news?cat=Supply+Chain" class="news-cat">Supply Chain</a>
-      <a href="/news?cat=Company+Updates" class="news-cat">Company Updates</a>
+      <a href="/news?tab=company" class="news-cat{% if active_tab != 'industry' %} active{% endif %}">Chip Stock News</a>
+      <a href="/news?tab=industry" class="news-cat{% if active_tab == 'industry' %} active{% endif %}">Industry Insights</a>
     </div>
   </section>
 

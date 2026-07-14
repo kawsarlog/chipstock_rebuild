@@ -542,10 +542,32 @@ def excess():
     return render_template("excess.html")
 
 
+def _news_bucket(category: str) -> str:
+    """Sort a post into one of two news buckets.
+
+    'company'  → Chip Stock News (awards, achievements, press, recognition)
+    'industry' → Industry Insights (market news, semiconductor updates)
+
+    Uses keyword matching so it works regardless of the exact category
+    labels editors use. Uncategorised posts default to Chip Stock News so
+    the default landing tab is never empty.
+    """
+    c = (category or "").strip().lower()
+    if not c:
+        return "company"
+    company_kw = ("chip stock", "chipstock", "company", "press",
+                  "award", "recognition", "announcement", "distributor")
+    return "company" if any(k in c for k in company_kw) else "industry"
+
+
 @app.route("/news")
 def news():
-    posts = _blog_get_all(include_drafts=False)
-    return render_template("news.html", posts=posts)
+    tab = request.args.get("tab", "company")
+    if tab not in ("company", "industry"):
+        tab = "company"
+    all_posts = _blog_get_all(include_drafts=False)
+    posts = [p for p in all_posts if _news_bucket(p.get("category")) == tab]
+    return render_template("news.html", posts=posts, active_tab=tab)
 
 
 @app.route("/news/<slug>")
