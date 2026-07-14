@@ -132,7 +132,7 @@ def _blog_get_all(include_drafts=False):
             cond = "" if include_drafts else "WHERE status = 'published'"
             cur.execute(f"""
                 SELECT id, title, slug, excerpt, featured_image, author, category,
-                       tags, status, created_at, published_at
+                       news_section, tags, status, created_at, published_at
                 FROM blog_posts {cond}
                 ORDER BY COALESCE(published_at, created_at) DESC
             """)
@@ -148,7 +148,7 @@ def _blog_get_slug(slug):
         with db.cursor() as cur:
             cur.execute("""
                 SELECT id, title, slug, excerpt, content, featured_image, author,
-                       category, tags, seo_title, seo_description, status, created_at, published_at
+                       category, news_section, tags, seo_title, seo_description, status, created_at, published_at
                 FROM blog_posts WHERE slug = %s
             """, (slug,))
             row = cur.fetchone()
@@ -166,7 +166,7 @@ def _blog_get_id(post_id):
         with db.cursor() as cur:
             cur.execute("""
                 SELECT id, title, slug, excerpt, content, featured_image, author,
-                       category, tags, seo_title, seo_description, status, created_at, published_at
+                       category, news_section, tags, seo_title, seo_description, status, created_at, published_at
                 FROM blog_posts WHERE id = %s
             """, (post_id,))
             row = cur.fetchone()
@@ -185,12 +185,12 @@ def _blog_create(data):
             pub_at = datetime.datetime.utcnow() if data.get("status") == "published" else None
             cur.execute("""
                 INSERT INTO blog_posts (title, slug, excerpt, content, featured_image,
-                    author, category, tags, seo_title, seo_description, status, published_at)
-                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id
+                    author, category, news_section, tags, seo_title, seo_description, status, published_at)
+                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id
             """, (
                 data["title"], data["slug"], data.get("excerpt"), data.get("content"),
                 data.get("featured_image"), data.get("author", "Chipstock Team"),
-                data.get("category"), data.get("tags", []),
+                data.get("category"), data.get("news_section") or None, data.get("tags", []),
                 data.get("seo_title") or data["title"],
                 data.get("seo_description") or data.get("excerpt", ""),
                 data.get("status", "draft"), pub_at,
@@ -217,13 +217,13 @@ def _blog_update(post_id, data):
             cur.execute("""
                 UPDATE blog_posts SET
                     title=%s, slug=%s, excerpt=%s, content=%s, featured_image=%s,
-                    author=%s, category=%s, tags=%s, seo_title=%s, seo_description=%s,
+                    author=%s, category=%s, news_section=%s, tags=%s, seo_title=%s, seo_description=%s,
                     status=%s, published_at=%s, updated_at=NOW()
                 WHERE id=%s
             """, (
                 data["title"], data["slug"], data.get("excerpt"), data.get("content"),
                 data.get("featured_image"), data.get("author", "Chipstock Team"),
-                data.get("category"), data.get("tags", []),
+                data.get("category"), data.get("news_section") or None, data.get("tags", []),
                 data.get("seo_title") or data["title"],
                 data.get("seo_description") or data.get("excerpt", ""),
                 data.get("status", "draft"), pub_at, post_id,
@@ -565,8 +565,14 @@ def news():
     tab = request.args.get("tab", "company")
     if tab not in ("company", "industry"):
         tab = "company"
+    def bucket_of(p):
+        # Explicit admin choice wins; otherwise fall back to keyword bucketing.
+        ns = (p.get("news_section") or "").strip().lower()
+        if ns in ("company", "industry"):
+            return ns
+        return _news_bucket(p.get("category"))
     all_posts = _blog_get_all(include_drafts=False)
-    posts = [p for p in all_posts if _news_bucket(p.get("category")) == tab]
+    posts = [p for p in all_posts if bucket_of(p) == tab]
     return render_template("news.html", posts=posts, active_tab=tab)
 
 
@@ -627,6 +633,7 @@ def admin_post_new():
             "featured_image": request.form.get("featured_image", ""),
             "author": request.form.get("author", "Chipstock Team"),
             "category": request.form.get("category", ""),
+            "news_section": request.form.get("news_section", ""),
             "tags": tags,
             "seo_title": request.form.get("seo_title", ""),
             "seo_description": request.form.get("seo_description", ""),
@@ -655,6 +662,7 @@ def admin_post_edit(post_id):
             "featured_image": request.form.get("featured_image", ""),
             "author": request.form.get("author", "Chipstock Team"),
             "category": request.form.get("category", ""),
+            "news_section": request.form.get("news_section", ""),
             "tags": tags,
             "seo_title": request.form.get("seo_title", ""),
             "seo_description": request.form.get("seo_description", ""),

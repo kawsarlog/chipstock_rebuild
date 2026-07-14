@@ -241,6 +241,13 @@ textarea{min-height:80px}
               {% endfor %}
             </select>
 
+            <label>News Section <span style="color:#888;font-weight:400;font-size:.85em">(which News tab this post shows in)</span></label>
+            <select name="news_section">
+              <option value="">— Auto (based on category) —</option>
+              <option value="company"  {{ 'selected' if post and post.news_section == 'company'  else '' }}>Chip Stock News</option>
+              <option value="industry" {{ 'selected' if post and post.news_section == 'industry' else '' }}>Industry Insights</option>
+            </select>
+
             <label>Tags</label>
             <input type="text" name="tags" id="tags-input"
               value="{{ post.tags|join(', ') if post and post.tags else '' }}"
