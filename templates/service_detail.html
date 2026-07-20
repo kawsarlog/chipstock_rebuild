@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}{{ page.name }} — Chipstock{% endblock %}
+
+{% block content %}
+{% set U = "/static/uploads" %}
+<main class="service_page excess_page">
+
+    <section class="breadcrumbs_section">
+        <div class="breadcrumbs_wrap">
+            <div class="breadcrumbs">
+                <span><a href="/">Main</a></span>
+                <span> › </span>
+                <span><a href="/services">our services</a></span>
+                <span> › </span>
+                <span>{{ page.name|lower }}</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="second_section">
+        <div class="second_image"><img src="{{ U }}/2025/04/image-fon.webp" alt=""></div>
+        <div class="second_wrap">
+            <div class="second_top">
+                <article class="second_title black all_text">{{ page.title_html|safe }}</article>
+                <p class="second_text">{{ page.subtitle|safe }}</p>
+            </div>
+            <div class="second_items">
+                {% for it in page['items'] %}
+                <div class="second_item">
+                    <span class="second_item_number">{{ it.num }}</span>
+                    <h3 class="second_item_title">{{ it.title }}</h3>
+                    <p class="second_item_text">{{ it.text }}</p>
+                    <div class="second_item_image"><img src="{{ U }}/2025/04/{{ it.img }}" alt=""></div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <section class="third_section">
+        <div class="third_wrap">
+            <div class="third_left">
+                <h2 class="third_title">Do you have excess inventory sitting around?</h2>
+                <p class="third_text">We're always procuring parts. Send us your excess inventory list and we'll get you an immediate offer.</p>
+            </div>
+            <div class="third_right">
+                <p class="third_form_title">Form</p>
+                <form class="excess_form" method="post" action="/excess/submit">
+                    <div class="field">
+                        <label>Name*</label>
+                        <p><span><input type="text" name="name" required></span></p>
+                    </div>
+                    <div class="field">
+                        <label>Company name*</label>
+                        <p><span><input type="text" name="company" required></span></p>
+                    </div>
+                    <div class="field">
+                        <label>E-mail*</label>
+                        <p><span><input type="email" name="email" required></span></p>
+                    </div>
+                    <div class="field">
+                        <label>Phone number*</label>
+                        <p><span><input type="text" name="phone" required></span></p>
+                    </div>
+                    <div class="field">
+                        <label>Quantity*</label>
+                        <p><span><input type="text" name="quantity" required></span></p>
+                    </div>
+                    <div class="field">
+                        <label>Part Number*</label>
+                        <p><span><input type="text" name="part_number" required></span></p>
+                    </div>
+                    <div class="field_upload">
+                        <label>CSV Upload</label>
+                        <div class="upload_box">
+                            <input type="file" name="csv_file" accept=".csv,.xlsx,.xls" style="display:none" id="csv-upload">
+                            <label for="csv-upload" style="cursor:pointer">Click or drag a file to this area to upload.</label>
+                        </div>
+                    </div>
+                    <button type="submit" class="submit_btn">Submit excess inventory request</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+</main>
+{% endblock %}
