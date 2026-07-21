@@ -371,10 +371,25 @@ body .bottom_section_title .border { color: #B6F223 !important; border-color: rg
 .home_page .third_item .third_item_number,
 .home_page .third_item .third_item_number span { transition: color .3s ease, opacity .3s ease; }
 
-/* Card 1 — full-bleed image: keep number + title white for readability */
+/* Card 1 — full-bleed image: keep number + title above image, white for readability */
+.home_page .third_item.variant_1 .third_item_image {
+  z-index: 0;
+}
+.home_page .third_item.variant_1 .third_item_number,
+.home_page .third_item.variant_1 .third_item_title {
+  z-index: 2;
+}
 .home_page .third_item.variant_1 .third_item_number span,
 .home_page .third_item.variant_1 .third_item_title span {
   color: #f5f5fa !important;
+}
+
+/* Dark cards (#0b0b0b) — ensure title text stays light */
+.home_page .third_item .third_item_inner[style*="0b0b0b"] .third_item_title span {
+  color: #f5f5fa !important;
+}
+.home_page .third_item .third_item_inner[style*="0b0b0b"] .third_item_title span:last-child {
+  color: #cdcdd1 !important;
 }
 
 /* Description text default: light on dark cards, dark on light (#f5f5fa) cards */

@@ -365,11 +365,11 @@ body.cs-header-menu-open .header_backdrop {
 
   .header_link .main_button_basic.button_basic,
   .header_link .button_basic {
-    padding: 0.45rem 1rem !important;
-    height: 2.25rem !important;
-    min-height: 2.25rem !important;
-    max-height: 2.25rem !important;
-    font-size: 0.825rem !important;
+    padding: 0.65rem 1.35rem !important;
+    height: 2.65rem !important;
+    min-height: 2.65rem !important;
+    max-height: 2.65rem !important;
+    font-size: 0.92rem !important;
     font-weight: 700 !important;
     line-height: 1 !important;
     white-space: nowrap !important;
@@ -1297,10 +1297,10 @@ footer.site-footer,
 
 .footer_link .main_button_basic.button_basic,
 .footer_link .button_basic {
-  padding: 0.45rem 1.15rem !important;
-  min-height: 2.25rem !important;
-  height: 2.25rem !important;
-  font-size: 0.825rem !important;
+  padding: 0.65rem 1.35rem !important;
+  min-height: 2.65rem !important;
+  height: 2.65rem !important;
+  font-size: 0.92rem !important;
   font-weight: 700 !important;
 }
 
