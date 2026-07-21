@@ -361,7 +361,7 @@ body .bottom_section_title .border { color: #B6F223 !important; border-color: rg
 .footer_link .main_button_basic.button_basic:hover,
 .header_mob_link .main_button_basic.button_basic:hover { color: #0a0a0a !important; }
 
-/* ── Service cards — all text white, title stays visible on hover ── */
+/* ── Service cards — hover shows green panel + description text ── */
 .home_page .third_item_inner { transition: background-color .3s ease; }
 .home_page .third_item .third_item_title,
 .home_page .third_item .third_item_title p,
@@ -369,30 +369,31 @@ body .bottom_section_title .border { color: #B6F223 !important; border-color: rg
 .home_page .third_item .third_item_text,
 .home_page .third_item .third_item_text p,
 .home_page .third_item .third_item_number,
-.home_page .third_item .third_item_number span { transition: color .3s ease; }
+.home_page .third_item .third_item_number span { transition: color .3s ease, opacity .3s ease; }
+
+/* Card 1 — full-bleed image: keep number + title white for readability */
+.home_page .third_item.variant_1 .third_item_number span,
+.home_page .third_item.variant_1 .third_item_title span {
+  color: #f5f5fa !important;
+}
 
 /* Description text default: light on dark cards, dark on light (#f5f5fa) cards */
 .home_page .third_item .third_item_text { color: #cdcdd1; }
 .home_page .third_item .third_item_inner[style*="f5f5fa"] .third_item_text { color: #323233; }
 
-/* Keep the product image above the green hover sweep (:after circle) so it stays visible */
-.home_page .third_item .third_item_image { position: relative; z-index: 1; }
+.home_page .third_item .third_item_image { position: relative; z-index: 1; transition: opacity .3s ease; }
+.home_page .third_item .third_item_image img { transition: opacity .3s ease; }
 
-/* Hover (client spec): entire card turns Chip Stock green with a 0.3s transition,
-   title + number turn black and stay readable, and the product image stays
-   visible & centered. The long description is kept hidden on hover so it never
-   covers the image. variant_1 uses a full-bleed background image, so it fades on
-   hover to let the green + black title show. */
+/* Hover: full green card, number + description visible, title + image hidden */
 .home_page .third_item:hover .third_item_inner { background-color: #B6F223 !important; }
-.home_page .third_item.variant_1:hover .third_item_image img { opacity: 0; transition: opacity .3s ease; }
-.home_page .third_item:hover .third_item_title { opacity: 1 !important; }
-.home_page .third_item:hover .third_item_text { opacity: 0 !important; }
-.home_page .third_item:hover .third_item_title,
-.home_page .third_item:hover .third_item_title p,
-.home_page .third_item:hover .third_item_title span,
+.home_page .third_item:hover .third_item_title { opacity: 0 !important; }
+.home_page .third_item:hover .third_item_text { opacity: 1 !important; color: #0B0B0B !important; }
+.home_page .third_item:hover .third_item_image,
+.home_page .third_item:hover .third_item_image img { opacity: 0 !important; }
 .home_page .third_item:hover .third_item_number,
 .home_page .third_item:hover .third_item_number p,
 .home_page .third_item:hover .third_item_number span { color: #0B0B0B !important; }
+.home_page .third_item:hover .third_item_number:before { color: #0B0B0B !important; }
 
 /* ── Article sidebar ── */
 .single_news_page .article_wrap { max-width: 1300px !important; }

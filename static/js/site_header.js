@@ -6,7 +6,7 @@
   var backdrop = document.getElementById("cs-header-backdrop");
   if (!masthead || !openBtn || !menu) return;
 
-  var mq = window.matchMedia("(max-width: 1023px)");
+  var mq = window.matchMedia("(max-width: 767px)");
 
   function isMobile() {
     return mq.matches;

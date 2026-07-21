@@ -614,8 +614,7 @@ def _news_bucket(category: str) -> str:
     'industry' → Industry Insights (market news, semiconductor updates)
 
     Uses keyword matching so it works regardless of the exact category
-    labels editors use. Uncategorised posts default to Chip Stock News so
-    the default landing tab is never empty.
+    labels editors use. Uncategorised posts default to Chip Stock News.
     """
     c = (category or "").strip().lower()
     if not c:
@@ -627,9 +626,9 @@ def _news_bucket(category: str) -> str:
 
 @app.route("/news")
 def news():
-    tab = request.args.get("tab", "company")
+    tab = request.args.get("tab", "industry")
     if tab not in ("company", "industry"):
-        tab = "company"
+        tab = "industry"
     def bucket_of(p):
         # Explicit admin choice wins; otherwise fall back to keyword bucketing.
         ns = (p.get("news_section") or "").strip().lower()
