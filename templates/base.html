@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/remodal.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/remodal-default-theme.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/select2.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/chipstock.css') }}?v=7">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/chipstock.css') }}?v=8">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/catalog.css') }}">
 
     {% block extra_head %}{% endblock %}
@@ -25,6 +25,9 @@
 
 <body>
 <div id="page" class="site">
+    {% set path = request.path %}
+    {% set is_excess = path.startswith('/services/excess-inventory-management') %}
+    {% set is_services = path.startswith('/services') and not is_excess %}
 
     <header id="masthead" class="site-header">
         <div class="header_wrap">
@@ -40,14 +43,14 @@
                 </button>
                 <nav class="header_nav" aria-label="Primary">
                     <ul>
-                        <li><a href="/services"><span class="nav-num">01 /</span> Our Services</a></li>
-                        <li><a href="/about"><span class="nav-num">02 /</span> About us</a></li>
-                        <li><a href="/quality"><span class="nav-num">03 /</span> Quality</a></li>
-                        <li><a href="/products"><span class="nav-num">04 /</span> Products</a></li>
-                        <li><a href="/catalog"{% if request.path.startswith('/catalog') %} style="color:var(--cs-accent)"{% endif %}><span class="nav-num">05 /</span> Catalog</a></li>
-                        <li><a href="/news"><span class="nav-num">06 /</span> News</a></li>
-                        <li><a href="/contact"><span class="nav-num">07 /</span> Contact</a></li>
-                        <li><a href="/services/excess-inventory-management"><span class="nav-num">08 /</span> Excess Inventory Management</a></li>
+                        <li class="{% if is_services %}current-menu-item{% endif %}"><a href="/services"{% if is_services %} aria-current="page"{% endif %}><span class="nav-num">01 /</span> Our Services</a></li>
+                        <li class="{% if path.startswith('/about') %}current-menu-item{% endif %}"><a href="/about"{% if path.startswith('/about') %} aria-current="page"{% endif %}><span class="nav-num">02 /</span> About us</a></li>
+                        <li class="{% if path.startswith('/quality') %}current-menu-item{% endif %}"><a href="/quality"{% if path.startswith('/quality') %} aria-current="page"{% endif %}><span class="nav-num">03 /</span> Quality</a></li>
+                        <li class="{% if path.startswith('/products') %}current-menu-item{% endif %}"><a href="/products"{% if path.startswith('/products') %} aria-current="page"{% endif %}><span class="nav-num">04 /</span> Products</a></li>
+                        <li class="{% if path.startswith('/catalog') %}current-menu-item{% endif %}"><a href="/catalog"{% if path.startswith('/catalog') %} aria-current="page"{% endif %}><span class="nav-num">05 /</span> Catalog</a></li>
+                        <li class="{% if path.startswith('/news') %}current-menu-item{% endif %}"><a href="/news"{% if path.startswith('/news') %} aria-current="page"{% endif %}><span class="nav-num">06 /</span> News</a></li>
+                        <li class="{% if path.startswith('/contact') %}current-menu-item{% endif %}"><a href="/contact"{% if path.startswith('/contact') %} aria-current="page"{% endif %}><span class="nav-num">07 /</span> Contact</a></li>
+                        <li class="{% if is_excess %}current-menu-item{% endif %}"><a href="/services/excess-inventory-management"{% if is_excess %} aria-current="page"{% endif %}><span class="nav-num">08 /</span> Excess Inventory Management</a></li>
                     </ul>
                 </nav>
                 <div class="header_mob_link">
@@ -63,7 +66,6 @@
                     <path d="M12.5 25.27C12.358 25.27 12.2393 25.2216 12.144 25.125C12.0487 25.0283 12.0007 24.9093 12 24.768C11.9993 24.6266 12.0473 24.508 12.144 24.412C12.2407 24.316 12.3593 24.2683 12.5 24.269H27.5C27.642 24.269 27.7607 24.317 27.856 24.413C27.952 24.509 28 24.628 28 24.77C28 24.912 27.952 25.0306 27.856 25.126C27.76 25.2213 27.6413 25.269 27.5 25.269L12.5 25.27ZM12.5 20.5C12.358 20.5 12.2393 20.452 12.144 20.356C12.0487 20.26 12.0007 20.141 12 19.999C11.9993 19.857 12.0473 19.7383 12.144 19.643C12.2407 19.5476 12.3593 19.5 12.5 19.5H27.5C27.642 19.5 27.7607 19.548 27.856 19.644C27.9513 19.74 27.9993 19.859 28 20.001C28.0007 20.143 27.9527 20.2616 27.856 20.357C27.7593 20.4523 27.6407 20.5 27.5 20.5H12.5ZM12.5 15.73C12.358 15.73 12.2393 15.6823 12.144 15.587C12.048 15.491 12 15.372 12 15.23C12 15.088 12.048 14.9693 12.144 14.874C12.24 14.7786 12.3587 14.731 12.5 14.731H27.5C27.642 14.731 27.7607 14.779 27.856 14.875C27.9513 14.971 27.9993 15.0893 28 15.23C28.0007 15.3706 27.9527 15.4893 27.856 15.586C27.7593 15.6826 27.6407 15.7306 27.5 15.73H12.5Z" fill="#F5F5FA"></path>
                 </svg>
             </button>
-        </div>
         </div>
     </header>
     <div id="cs-header-backdrop" class="header_backdrop" aria-hidden="true"></div>

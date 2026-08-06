@@ -86,7 +86,8 @@ jQuery(function ($) {
     /*************************** end select ***************************/
 
     /*************************** height header ***************************/
-    if (jQuery(window).innerWidth() > 768) {
+    /* Legacy WordPress sticky (.fixing) — skip when masthead has no .fixing wrapper */
+    if (jQuery(".fixing").length && jQuery(window).innerWidth() > 768) {
       function HH() {
         var heiHeader = jQuery(".fixing").height();
         jQuery("header").height(heiHeader);

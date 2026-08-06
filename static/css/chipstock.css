@@ -52,7 +52,8 @@ body {
   background: var(--cs-bg);
   color: var(--cs-text);
   line-height: 1.5;
-  overflow-x: hidden;
+  /* clip keeps horizontal overflow contained without breaking position:sticky */
+  overflow-x: clip;
 }
 
 img {
@@ -76,6 +77,9 @@ a:hover {
   background: #000000;
   border-bottom: 1px solid var(--cs-border);
   padding-top: env(safe-area-inset-top, 0px);
+  /* Override legacy main.css height: 5.9895vw !important that clips/hides the bar */
+  height: auto !important;
+  margin-bottom: 0 !important;
 }
 
 .header_wrap {
@@ -170,10 +174,14 @@ a:hover {
 .header_nav a::before,
 .header_nav a:before { content: none !important; }
 
-/* ── Scroll-spy: active nav item + section number highlight in brand green ── */
+/* ── Active page + scroll-spy: brand green (#B6F223) ── */
 .header_nav a { transition: color 0.25s ease; }
+.header_nav li.current-menu-item > a,
+.header_nav li.current-menu-item > a .nav-num,
 .header_nav a.spy-nav-active,
-.header_nav a.spy-nav-active .nav-num { color: var(--cs-accent) !important; }
+.header_nav a.spy-nav-active .nav-num {
+  color: var(--cs-accent) !important;
+}
 .home_page .second_number,
 .home_page .third_number,
 .home_page .fourth_number,
