@@ -547,17 +547,17 @@ _WHY_WORK_ITEMS = [
     {
         "num": "01/", "title": "Trusted Quality",
         "img": "smart-microchip-background-motherboard-closeup-technology-4.webp",
-        "text": "At Chipstock, quality is at the core of everything we do. Every component we supply undergoes a rigorous multi-step inspection process, including visual checks, dimensional analysis, X-ray and XRF testing, blacktop and remarking detection, and decapsulation when required. We adhere to industry standards such as AS6081 and IDEA-STD-1010, and work with certified third-party labs to verify authenticity and performance. Each shipment includes full documentation and a Certificate of Conformance, so you can source with total confidence — knowing you're getting genuine, traceable components every time.",
+        "text": "At Chipstock, quality is at the core of everything we do. Every component we supply undergoes a rigorous multi-step inspection process, including visual checks, dimensional analysis, X-ray and XRF testing, blacktop and remarking detection, and decapsulation when required. We adhere to industry standards such as AS6081 and IDEA-STD-1010, and work with certified third-party labs to verify authenticity and performance. Each shipment includes full documentation and a Certificate of Conformance, so you can source with total confidence - knowing you're getting genuine, traceable components every time.",
     },
     {
         "num": "02/", "title": "Global Reach Advantage",
         "img": "smart-microchip-background-motherboard-closeup-technology-5.webp",
-        "text": "Chipstock operates within a vast, vetted supplier network spanning key manufacturing regions worldwide. Our global footprint gives us real-time visibility into market availability and pricing — allowing us to move quickly, quote accurately, and secure hard-to-find components before others can. Whether you're facing a last-minute shortage or planning ahead, our team responds fast with verified solutions that keep your production on track. We don't just connect you to parts — we connect you to answers, without the delays and uncertainty of traditional sourcing channels.",
+        "text": "Chipstock operates within a vast, vetted supplier network spanning key manufacturing regions worldwide. Our global footprint gives us real-time visibility into market availability and pricing - allowing us to move quickly, quote accurately, and secure hard-to-find components before others can. Whether you're facing a last-minute shortage or planning ahead, our team responds fast with verified solutions that keep your production on track. We don't just connect you to parts - we connect you to answers, without the delays and uncertainty of traditional sourcing channels.",
     },
     {
         "num": "03/", "title": "Strategic Support & Savings",
         "img": "smart-microchip-background-motherboard-closeup-technology-6.webp",
-        "text": "At Chipstock, we don't just fill orders — we build sourcing strategies around your business. Our team works closely with you to understand your goals, challenges, and budget, offering tailored solutions that reduce costs without compromising quality. From long-term pricing agreements to identifying excess inventory opportunities, we help you maximize value and maintain supply chain stability — all through a dedicated point of contact who knows your business inside and out.",
+        "text": "At Chipstock, we don't just fill orders - we build sourcing strategies around your business. Our team works closely with you to understand your goals, challenges, and budget, offering tailored solutions that reduce costs without compromising quality. From long-term pricing agreements to identifying excess inventory opportunities, we help you maximize value and maintain supply chain stability - all through a dedicated point of contact who knows your business inside and out.",
     },
 ]
 
@@ -577,12 +577,12 @@ SERVICE_DETAIL = {
     "factory-direct": {
         "name": "Testing & Quality Verification",
         "title_html": '<h2><span style="color: #7d7d80;">Testing &amp; </span> Quality Verification</h2>',
-        "subtitle": "Our quality process leaves nothing to chance.<br>Every component we deliver is inspected, tested, and fully documented — ensuring authenticity, performance, and complete peace of mind.",
+        "subtitle": "Our quality process leaves nothing to chance.<br>Every component we deliver is inspected, tested, and fully documented - ensuring authenticity, performance, and complete peace of mind.",
         "items": [
             {
                 "num": "01/", "title": "Multi-Step Inspection Process",
                 "img": "smart-microchip-background-motherboard-closeup-technology-4.webp",
-                "text": "Every component that enters our supply chain is put through a thorough, multi-step inspection to ensure it meets Chipstock's strict quality standards. Our trained quality assurance team evaluates each part visually and dimensionally, identifying any signs of damage, irregularities, or inconsistencies. We check for accurate labeling, packaging integrity, date codes, and manufacturer markings — all to ensure components are authentic and match your specifications before they ever reach your production line.",
+                "text": "Every component that enters our supply chain is put through a thorough, multi-step inspection to ensure it meets Chipstock's strict quality standards. Our trained quality assurance team evaluates each part visually and dimensionally, identifying any signs of damage, irregularities, or inconsistencies. We check for accurate labeling, packaging integrity, date codes, and manufacturer markings - all to ensure components are authentic and match your specifications before they ever reach your production line.",
             },
             {
                 "num": "02/", "title": "Advanced Testing & Analysis",
@@ -592,7 +592,7 @@ SERVICE_DETAIL = {
             {
                 "num": "03/", "title": "Full Traceability & Certification",
                 "img": "smart-microchip-background-motherboard-closeup-technology-6.webp",
-                "text": "We believe in total transparency. Every verified component ships with a full Certificate of Conformance (COC) and supporting documentation, giving you clear traceability back to the source. Our tracking process includes manufacturer data, country of origin, MSL handling, RoHS and lead-free compliance, and more. By maintaining this level of detail and documentation, we help you meet industry and regulatory standards — while protecting your business from risk.",
+                "text": "We believe in total transparency. Every verified component ships with a full Certificate of Conformance (COC) and supporting documentation, giving you clear traceability back to the source. Our tracking process includes manufacturer data, country of origin, MSL handling, RoHS and lead-free compliance, and more. By maintaining this level of detail and documentation, we help you meet industry and regulatory standards - while protecting your business from risk.",
             },
         ],
     },

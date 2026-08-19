@@ -2337,6 +2337,46 @@ body.cs-modal-open {
 /* ==========================================
    Services Page - Enhanced Hover Effects & Branding Circle
    ========================================== */
+/* Services pages — typography aligned with chipstock.com */
+.services_page .second_title h2,
+.services_page .third_title h2 {
+  margin: 0;
+  font-weight: 500;
+  font-size: 2.8645vw;
+  line-height: 1.15;
+}
+
+.services_page .second_item_title {
+  font-size: 1.4583vw;
+  line-height: 1.2;
+}
+
+.services_page .third_content .third_text,
+.services_page .third_content .third_text p {
+  margin: 0;
+  font-weight: 400;
+  font-size: 1.1233vw;
+  line-height: 1.6;
+  color: var(--text_color_white);
+}
+
+@media (max-width: 768px) {
+  .services_page .second_title h2,
+  .services_page .third_title h2 {
+    font-size: 8vw;
+  }
+
+  .services_page .second_item_title {
+    font-size: 6.4vw;
+  }
+
+  .services_page .third_content .third_text,
+  .services_page .third_content .third_text p {
+    font-size: 3.7333vw;
+    line-height: 1.4;
+  }
+}
+
 .services_page .second_item {
   position: relative;
   transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
