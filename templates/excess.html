@@ -47,51 +47,81 @@
         </div>
     </section>
 
-    <section class="third_section">
-        <div class="third_wrap">
-            <div class="third_left">
-                <h2 class="third_title">Do you have excess inventory sitting around?</h2>
-                <p class="third_text">We're always procuring parts. Send us your excess inventory list and we'll get you an immediate offer.</p>
+    <section class="form_contact_section" id="excess-form">
+        <div class="form_contact_wrap">
+            <div class="form_contact_left">
+                <div class="form_contact_image">
+                    <img src="{{ U }}/2025/04/rectangle-12.webp" alt="Chip Stock circuit board" />
+                </div>
+                <div class="form_contact_content">
+                    <h2 class="form_contact_title">Do you have excess inventory sitting around?</h2>
+                    <p class="form_contact_text">We're always procuring parts. Send us your excess inventory list and we'll get you an immediate offer.</p>
+                </div>
             </div>
-            <div class="third_right">
-                <p class="third_form_title">Form</p>
-                <form class="excess_form" method="post" action="/excess/submit">
-                    <div class="field">
-                        <label>Name*</label>
-                        <p><span><input type="text" name="name" required></span></p>
-                    </div>
-                    <div class="field">
-                        <label>Company name*</label>
-                        <p><span><input type="text" name="company" required></span></p>
-                    </div>
-                    <div class="field">
-                        <label>E-mail*</label>
-                        <p><span><input type="email" name="email" required></span></p>
-                    </div>
-                    <div class="field">
-                        <label>Phone number*</label>
-                        <p><span><input type="text" name="phone" required></span></p>
-                    </div>
-                    <div class="field">
-                        <label>Quantity*</label>
-                        <p><span><input type="text" name="quantity" required></span></p>
-                    </div>
-                    <div class="field">
-                        <label>Part Number*</label>
-                        <p><span><input type="text" name="part_number" required></span></p>
-                    </div>
-                    <div class="field_upload">
-                        <label>CSV Upload</label>
-                        <div class="upload_box">
-                            <input type="file" name="csv_file" accept=".csv,.xlsx,.xls" style="display:none" id="csv-upload">
-                            <label for="csv-upload" style="cursor:pointer">Click or drag a file to this area to upload.</label>
+            <div class="form_contact_right">
+                <h2 class="form_contact_right_title">Form</h2>
+                <div class="form_contact_wraper">
+                    <form class="wpcf7-form" method="post" action="/excess/submit" enctype="multipart/form-data" novalidate>
+                        <div class="fields service_contact_form">
+                            <div class="field name">
+                                <p><label for="excess-name">Name*</label><br>
+                                <span><input class="wpcf7-form-control" type="text" name="name" id="excess-name" required></span></p>
+                            </div>
+                            <div class="field company-name">
+                                <p><label for="excess-company">Company name*</label><br>
+                                <span><input class="wpcf7-form-control" type="text" name="company" id="excess-company" required></span></p>
+                            </div>
+                            <div class="field email">
+                                <p><label for="excess-email">E-mail*</label><br>
+                                <span><input class="wpcf7-form-control" type="email" name="email" id="excess-email" required></span></p>
+                            </div>
+                            <div class="field phone">
+                                <p><label for="excess-phone">Phone number*</label><br>
+                                <span><input class="wpcf7-form-control" type="tel" name="phone" id="excess-phone" required></span></p>
+                            </div>
+                            <div class="field quantity">
+                                <p><label for="excess-quantity">Quantity*</label><br>
+                                <span><input class="wpcf7-form-control" type="text" name="quantity" id="excess-quantity" required></span></p>
+                            </div>
+                            <div class="field part-number">
+                                <p><label for="excess-part-number">Part Number*</label><br>
+                                <span><input class="wpcf7-form-control" type="text" name="part_number" id="excess-part-number" required></span></p>
+                            </div>
+                            <div class="part-csv" id="excess-csv-wrap">
+                                <p><label for="file-csv">CSV Upload</label></p>
+                                <div class="form-contact-file-csv">
+                                    <p>
+                                        <span><input type="file" name="csv_file" id="file-csv" accept=".csv,.xlsx,.xls"></span><br>
+                                        <span class="form-contact-text">Click or drag a file to this area to upload.</span>
+                                        <span id="file-info"></span>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="submit">
+                                <p><input class="wpcf7-form-control wpcf7-submit" type="submit" value="Submit excess inventory request"></p>
+                            </div>
                         </div>
-                    </div>
-                    <button type="submit" class="submit_btn">Submit excess inventory request</button>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
     </section>
 
 </main>
+<script>
+(function () {
+  var fileInput = document.getElementById('file-csv');
+  var csvWrap = document.getElementById('excess-csv-wrap');
+  var fileInfo = document.getElementById('file-info');
+  if (!fileInput || !csvWrap) return;
+  function syncFileState() {
+    var hasFile = fileInput.files && fileInput.files.length > 0;
+    csvWrap.classList.toggle('has-file', hasFile);
+    if (fileInfo) {
+      fileInfo.textContent = hasFile ? fileInput.files[0].name : '';
+    }
+  }
+  fileInput.addEventListener('change', syncFileState);
+})();
+</script>
 {% endblock %}

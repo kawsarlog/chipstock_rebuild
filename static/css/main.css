@@ -1249,7 +1249,7 @@ body .remodal-wrapper .remodal .field br {
   height: 2.6562vw;
   display: block;
   flex-shrink: 0;
-  background-image: url(//test02kolos-developer.fun/wp-content/themes/chipstock/css/../images/form-contact-file-csv.svg);
+  background-image: url(../images/form-contact-file-csv.svg);
   background-repeat: no-repeat;
   background-size: contain;
   background-position: center;

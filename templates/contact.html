@@ -56,20 +56,86 @@
             <div class="form_contact_right">
                 <h2 class="form_contact_right_title">Request a quote</h2>
                 <div class="form_contact_wraper">
-                    <form class="wpcf7-form contact_form_fields" method="post" action="/contact/submit">
-                        <div class="field"><p><span><input type="text" name="name" placeholder="Your Name*" required></span></p></div>
-                        <div class="field"><p><span><input type="text" name="phone" placeholder="Phone number*" required></span></p></div>
-                        <div class="field"><p><span><input type="email" name="email" placeholder="E-mail*" required></span></p></div>
-                        <div class="field"><p><span><input type="text" name="quantity" placeholder="Quantity*" required></span></p></div>
-                        <div class="field"><p><span><input type="text" name="part_number" placeholder="Part Number*" required></span></p></div>
-                        <div class="field massage"><p><span><textarea name="message" placeholder="Message" rows="3"></textarea></span></p></div>
-                        <div class="submit"><p><input type="submit" value="Send"></p></div>
+                    <form class="wpcf7-form contact_form_fields tobix-cf" method="post" action="/contact/submit" novalidate>
+                        <div class="tobix-field">
+                            <input class="wpcf7-form-control tobix-input" type="text" name="name" id="contact-name" placeholder="" aria-required="true" required>
+                            <label class="tobix-label" for="contact-name">Your Name*</label>
+                        </div>
+                        <div class="tobix-field">
+                            <input class="wpcf7-form-control tobix-input" type="tel" name="phone" id="contact-phone" placeholder="" aria-required="true" required>
+                            <label class="tobix-label" for="contact-phone">Phone number*</label>
+                        </div>
+                        <div class="tobix-field">
+                            <input class="wpcf7-form-control tobix-input" type="email" name="email" id="contact-email" placeholder="" aria-required="true" required>
+                            <label class="tobix-label" for="contact-email">E-mail*</label>
+                        </div>
+                        <div class="tobix-field">
+                            <input class="wpcf7-form-control tobix-input" type="text" name="quantity" id="contact-quantity" placeholder="" aria-required="true" required>
+                            <label class="tobix-label" for="contact-quantity">Quantity*</label>
+                        </div>
+                        <div class="tobix-field">
+                            <input class="wpcf7-form-control tobix-input" type="text" name="part_number" id="contact-part-number" placeholder="" aria-required="true" required>
+                            <label class="tobix-label" for="contact-part-number">Part Number*</label>
+                        </div>
+                        <div class="tobix-field tobix-field--textarea">
+                            <textarea class="wpcf7-form-control tobix-input" name="message" id="contact-message" placeholder="" rows="3"></textarea>
+                            <label class="tobix-label" for="contact-message">Message</label>
+                        </div>
+                        <div class="tobix-submit">
+                            <p><input class="wpcf7-form-control wpcf7-submit tobix-btn" type="submit" value="Submit"></p>
+                        </div>
+                        <div class="contact_direct_wrap">
+                            <p>
+                                <span class="contact_direct_lead">Or reach out to us directly:</span><br>
+                                <span class="contact_direct_email"><a href="mailto:rfq@chip-stock.com">rfq@chip-stock.com</a></span>
+                            </p>
+                        </div>
                     </form>
-                    <p class="contact_direct">Or reach out to us directly: <a href="mailto:rfq@chip-stock.com">rfq@chip-stock.com</a></p>
                 </div>
             </div>
         </div>
     </section>
 
 </main>
+<script>
+(function () {
+  function toggleFilledState(root) {
+    (root || document).querySelectorAll('.contact_page .tobix-field').forEach(function (wrap) {
+      var input = wrap.querySelector('.tobix-input');
+      if (!input) return;
+      function check() {
+        wrap.classList.toggle('tobix-filled', !!input.value.trim());
+      }
+      check();
+      input.addEventListener('input', check);
+      input.addEventListener('change', check);
+      input.addEventListener('blur', check);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', toggleFilledState);
+  } else {
+    toggleFilledState();
+  }
+
+  var submitBtn = document.querySelector('.contact_page .tobix-btn');
+  if (submitBtn) {
+    submitBtn.addEventListener('click', function () {
+      if (!submitBtn.classList.contains('loading')) {
+        submitBtn.dataset.originalText = submitBtn.value;
+        submitBtn.value = 'Sending.';
+        submitBtn.classList.add('loading');
+      }
+    });
+    submitBtn.closest('form').addEventListener('submit', function () {
+      if (!submitBtn.classList.contains('loading')) {
+        submitBtn.dataset.originalText = submitBtn.value;
+        submitBtn.value = 'Sending.';
+        submitBtn.classList.add('loading');
+      }
+    });
+  }
+})();
+</script>
 {% endblock %}
