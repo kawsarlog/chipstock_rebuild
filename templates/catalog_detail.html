@@ -40,12 +40,12 @@
         <div class="detail-manufacturer">{{ product.manufacturer }}</div>
         {% endif %}
 
-        <h1 class="detail-title">{{ product.description or product.product_id }}</h1>
-
         <div class="detail-pn-row">
           <span class="detail-pn-label">Part Number</span>
           <strong class="detail-pn-value">{{ product.product_id }}</strong>
         </div>
+
+        <h1 class="detail-title">{{ product.description or product.product_id }}</h1>
 
         <div class="detail-avail-row">
           <span class="detail-avail-dot"></span>
