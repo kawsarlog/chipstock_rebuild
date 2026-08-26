@@ -15,7 +15,7 @@
   {# ── Search + Filters ── #}
   <section class="catalog-filter-section">
     <div class="wrap">
-      <form class="catalog-form" method="get" action="/catalog" autocomplete="off">
+      <form class="catalog-form" method="get" action="/search" autocomplete="off">
         <input type="hidden" name="cat" value="{{ cat_key }}">
         <input type="hidden" name="page" value="1">
 
@@ -33,7 +33,7 @@
         {# Category tabs #}
         <div class="catalog-cat-tabs">
           {% for item in category_options %}{% set key = item[0] %}{% set label = item[1] %}
-          <a href="/catalog?cat={{ key }}&sort={{ sort }}"
+          <a href="/search?cat={{ key }}&sort={{ sort }}"
              class="catalog-cat-tab{% if key == cat_key %} active{% endif %}">{{ label }}</a>
           {% endfor %}
         </div>
@@ -81,7 +81,7 @@
       {% if rows %}
       <div class="catalog-grid">
         {% for r in rows %}
-        <a href="/catalog/{{ r.product_id }}" class="catalog-card">
+        <a href="/search/{{ r.product_id }}" class="catalog-card">
           <div class="catalog-card-img">
             {% if r.image_url %}
             <img src="{{ r.image_url | proxy_img }}" alt="{{ r.manufacturer or '' }}" loading="lazy">
@@ -104,14 +104,14 @@
       {% else %}
       <div class="catalog-empty">
         <p>No products match your search{% if q %} for <strong>"{{ q }}"</strong>{% endif %}.</p>
-        <a href="/catalog" class="catalog-reset-link">Clear filters</a>
+        <a href="/search" class="catalog-reset-link">Clear filters</a>
       </div>
       {% endif %}
 
       {# Pagination #}
       {% if total_pages > 1 %}
       <nav class="catalog-pagination" aria-label="Pagination">
-        {% set base = '/catalog?cat='~cat_key~'&sort='~sort~('&q='~q if q else '')~('&mfr='~mfr_filter if mfr_filter else '') %}
+        {% set base = '/search?cat='~cat_key~'&sort='~sort~('&q='~q if q else '')~('&mfr='~mfr_filter if mfr_filter else '') %}
         {% if page > 1 %}
         <a class="pg-link" href="{{ base }}&page={{ page-1 }}">← Prev</a>
         {% endif %}

@@ -876,9 +876,15 @@ def proxy_img_filter(url: Optional[str]) -> str:
     return url_for("catalog_image_proxy", token=_img_b64enc(url))
 
 
-# ── Catalog routes ────────────────────────────────────────────────────────────
-@app.route("/catalog")
+# ── Search (catalog) routes ───────────────────────────────────────────────────
+@app.route("/search")
+@app.route("/catalog")  # legacy alias → same page; redirect below preferred
 def catalog():
+    # Prefer canonical /search URL
+    if request.path.rstrip("/") == "/catalog":
+        qs = request.query_string.decode("utf-8", errors="ignore")
+        return redirect("/search" + (f"?{qs}" if qs else ""), code=301)
+
     q = request.args.get("q", "").strip()[:SEARCH_MAX]
     cat_key = request.args.get("cat", "ALL").strip().upper()
     if not any(k == cat_key for k, *_ in CATEGORY_OPTIONS):
@@ -920,7 +926,7 @@ def catalog():
     )
 
 
-@app.route("/catalog/<path:product_id>")
+@app.route("/search/<path:product_id>")
 def catalog_detail(product_id: str):
     product = fetch_product(product_id)
     if not product:
@@ -932,6 +938,12 @@ def catalog_detail(product_id: str):
         source=product.get("source"),
     )
     return render_template("catalog_detail.html", product=product, related=related)
+
+
+@app.route("/catalog/<path:product_id>")
+def catalog_detail_legacy(product_id: str):
+    """301 redirect old /catalog/<id> URLs to /search/<id>."""
+    return redirect(f"/search/{product_id}", code=301)
 
 
 @app.route("/api/search")
@@ -994,7 +1006,7 @@ SITEMAP_CHUNK  = 50_000   # max URLs per sitemap file (Google limit: 50k)
 
 _STATIC_PAGES: List[Tuple[str, str, str]] = [
     ("/",                                                    "1.0", "weekly"),
-    ("/catalog",                                             "0.9", "daily"),
+    ("/search",                                              "0.9", "daily"),
     ("/services",                                            "0.8", "monthly"),
     ("/about",                                               "0.7", "monthly"),
     ("/quality",                                             "0.7", "monthly"),
@@ -1088,7 +1100,7 @@ def sitemap_products(chunk: int):
                         break
                     for pid, updated_at in rows:
                         safe_pid = _html.escape(str(pid))
-                        loc = f"{SITE_BASE}/catalog/{safe_pid}"
+                        loc = f"{SITE_BASE}/search/{safe_pid}"
                         lastmod = (
                             f"<lastmod>{updated_at.date().isoformat()}</lastmod>"
                             if updated_at else ""
