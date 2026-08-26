@@ -216,34 +216,67 @@
 .detail-meta-label { font-size: .72rem; color: #555; text-transform: uppercase; letter-spacing: .06em; }
 .detail-meta-val { font-size: .88rem; color: #ccc; }
 
-/* Specs table */
-.detail-specs-section { border-top: 1px solid rgba(255,255,255,.08); padding: 2rem 0; }
-.detail-specs-title { font-size: 1.1rem; color: #fff; margin: 0 0 1.5rem; }
+/* Specs table — white panel (matches original product detail) */
+.detail-specs-section {
+  background: #fff;
+  border: none;
+  margin: 1.5rem 0 0;
+  padding: 2rem 1.5rem 2.25rem;
+}
+.detail-specs-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 1.25rem;
+  padding-bottom: .75rem;
+  border-bottom: 1px solid #e5e5e5;
+}
 
 /* Structured specs sections (chipstock products) */
-.specs-section { margin-bottom: 1.5rem; }
-.specs-section-title {
+.detail-specs-section .specs-section { margin-bottom: 1.5rem; }
+.detail-specs-section .specs-section-title {
   font-size: .75rem; font-weight: 700; letter-spacing: .08em;
-  text-transform: uppercase; color: #B6F223;
+  text-transform: uppercase; color: #333;
   padding: .4rem 0; margin-bottom: .6rem;
-  border-bottom: 1px solid rgba(182,242,35,.25);
+  border-bottom: 1px solid #e5e5e5;
 }
-.specs-list {
+.detail-specs-section .specs-list {
   list-style: none; margin: .5rem 0 0; padding: 0;
   display: flex; flex-wrap: wrap; gap: .3rem .8rem;
 }
-.specs-list li {
-  font-size: .83rem; color: #bbb; padding: .2rem .6rem;
-  background: #141414; border: 1px solid rgba(255,255,255,.07);
+.detail-specs-section .specs-list li {
+  font-size: .83rem; color: #444; padding: .2rem .6rem;
+  background: #f5f5f5; border: 1px solid #e8e8e8;
 }
 
 .detail-specs-body table { width: 100%; border-collapse: collapse; }
 .detail-specs-body th,
-.detail-specs-body td { padding: .55rem .8rem; text-align: left; font-size: .88rem; border-bottom: 1px solid rgba(255,255,255,.06); }
-.detail-specs-body th { color: #888; font-weight: 500; width: 35%; background: #0d0d0d; }
-.detail-specs-body td { color: #ddd; }
+.detail-specs-body td {
+  padding: .65rem .2rem;
+  text-align: left;
+  font-size: .88rem;
+  border-bottom: 1px solid #e8e8e8;
+  background: transparent;
+}
+.detail-specs-body th {
+  color: #555;
+  font-weight: 500;
+  width: 35%;
+  vertical-align: top;
+}
+.detail-specs-body thead th,
+.detail-specs-body tr:first-child th {
+  color: #666;
+  font-weight: 700;
+  font-size: .72rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  width: auto;
+  padding-bottom: .75rem;
+}
+.detail-specs-body td { color: #1a1a1a; }
 .detail-specs-body tr:hover th,
-.detail-specs-body tr:hover td { background: #141414; }
+.detail-specs-body tr:hover td { background: #f7f7f7; }
 
 /* CTA strip */
 .detail-cta-strip {
