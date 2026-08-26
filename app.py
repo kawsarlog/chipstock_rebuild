@@ -17,7 +17,7 @@ import urllib.error
 import urllib.request
 from email.utils import parseaddr
 from typing import Any, Dict, Generator, List, Optional, Tuple
-from urllib.parse import urlparse
+from urllib.parse import quote, urlencode, urlparse
 
 import functools
 import uuid
@@ -876,58 +876,7 @@ def proxy_img_filter(url: Optional[str]) -> str:
     return url_for("catalog_image_proxy", token=_img_b64enc(url))
 
 
-# ── Search (catalog) routes ───────────────────────────────────────────────────
-@app.route("/search")
-@app.route("/catalog")  # legacy alias → same page; redirect below preferred
-def catalog():
-    # Prefer canonical /search URL
-    if request.path.rstrip("/") == "/catalog":
-        qs = request.query_string.decode("utf-8", errors="ignore")
-        return redirect("/search" + (f"?{qs}" if qs else ""), code=301)
-
-    q = request.args.get("q", "").strip()[:SEARCH_MAX]
-    cat_key = request.args.get("cat", "ALL").strip().upper()
-    if not any(k == cat_key for k, *_ in CATEGORY_OPTIONS):
-        cat_key = "ALL"
-    sort = request.args.get("sort", "name_asc")
-    if sort not in SORT_KEYS:
-        sort = "name_asc"
-    try:
-        page = max(1, int(request.args.get("page", 1)))
-    except (ValueError, TypeError):
-        page = 1
-
-    # Sub-category filter (IC type — only for SEMICONDUCTORS / ALL tabs)
-    available_subcats = fetch_subcats(cat_key)
-    subcat_raw = request.args.get("subcat", "").strip()
-    subcat = subcat_raw if any(k == subcat_raw for k, _ in available_subcats) else ""
-
-    mfr_raw = request.args.get("mfr", "").strip()
-    mfrs = fetch_manufacturers(cat_key, subcat or None)
-    mfr_f = mfr_raw if any(m.lower() == mfr_raw.lower() for m in mfrs) else None
-
-    rows, total = fetch_catalog_page(cat_key, page, sort, mfr=mfr_f, q=q or None, subcat=subcat or None)
-    total_pages = max(1, math.ceil(total / PER_PAGE)) if total else 1
-    if page > total_pages:
-        page = total_pages
-
-    cat_label = next((lbl for k, lbl, *_ in CATEGORY_OPTIONS if k == cat_key), "All Products")
-
-    return render_template(
-        "catalog.html",
-        rows=rows, total=total, page=page, total_pages=total_pages,
-        showing_from=(page - 1) * PER_PAGE + 1 if total else 0,
-        showing_to=min(page * PER_PAGE, total),
-        page_numbers=_page_nums(page, total_pages),
-        cat_key=cat_key, cat_label=cat_label, sort=sort, q=q,
-        manufacturers=mfrs, mfr_filter=mfr_f or "",
-        category_options=CATEGORY_OPTIONS,
-        available_subcats=available_subcats, subcat=subcat,
-    )
-
-
-@app.route("/search/<path:product_id>")
-def catalog_detail(product_id: str):
+def _render_product_detail(product_id: str):
     product = fetch_product(product_id)
     if not product:
         abort(404)
@@ -940,10 +889,79 @@ def catalog_detail(product_id: str):
     return render_template("catalog_detail.html", product=product, related=related)
 
 
+# ── Search routes ─────────────────────────────────────────────────────────────
+# /search/?q=PART          → product detail
+# /search/?query=KEYWORD   → search results
+# /search/                 → browse catalog
+@app.route("/search/")
+def catalog():
+    # Product detail: /search/?q=PARTNUMBER
+    detail_q = request.args.get("q", "").strip()[:SEARCH_MAX]
+    if detail_q:
+        return _render_product_detail(detail_q)
+
+    # Search results: /search/?query=KEYWORD
+    query = request.args.get("query", "").strip()[:SEARCH_MAX]
+    cat_key = request.args.get("cat", "ALL").strip().upper()
+    if not any(k == cat_key for k, *_ in CATEGORY_OPTIONS):
+        cat_key = "ALL"
+    sort = request.args.get("sort", "name_asc")
+    if sort not in SORT_KEYS:
+        sort = "name_asc"
+    try:
+        page = max(1, int(request.args.get("page", 1)))
+    except (ValueError, TypeError):
+        page = 1
+
+    available_subcats = fetch_subcats(cat_key)
+    subcat_raw = request.args.get("subcat", "").strip()
+    subcat = subcat_raw if any(k == subcat_raw for k, _ in available_subcats) else ""
+
+    mfr_raw = request.args.get("mfr", "").strip()
+    mfrs = fetch_manufacturers(cat_key, subcat or None)
+    mfr_f = mfr_raw if any(m.lower() == mfr_raw.lower() for m in mfrs) else None
+
+    rows, total = fetch_catalog_page(
+        cat_key, page, sort, mfr=mfr_f, q=query or None, subcat=subcat or None
+    )
+    total_pages = max(1, math.ceil(total / PER_PAGE)) if total else 1
+    if page > total_pages:
+        page = total_pages
+
+    cat_label = next((lbl for k, lbl, *_ in CATEGORY_OPTIONS if k == cat_key), "All Products")
+
+    return render_template(
+        "catalog.html",
+        rows=rows, total=total, page=page, total_pages=total_pages,
+        showing_from=(page - 1) * PER_PAGE + 1 if total else 0,
+        showing_to=min(page * PER_PAGE, total),
+        page_numbers=_page_nums(page, total_pages),
+        cat_key=cat_key, cat_label=cat_label, sort=sort, q=query,
+        manufacturers=mfrs, mfr_filter=mfr_f or "",
+        category_options=CATEGORY_OPTIONS,
+        available_subcats=available_subcats, subcat=subcat,
+    )
+
+
+@app.route("/search")
+@app.route("/catalog")
+@app.route("/catalog/")
+def search_canonical_redirect():
+    """Redirect /search and /catalog (any slash) to /search/ keeping query string."""
+    qs = request.query_string.decode("utf-8", errors="ignore")
+    return redirect("/search/" + (f"?{qs}" if qs else ""), code=301)
+
+
+@app.route("/search/<path:product_id>")
+def catalog_detail_path_legacy(product_id: str):
+    """301 redirect old /search/<id> URLs to /search/?q=<id>."""
+    return redirect(f"/search/?q={quote(product_id, safe=':')}", code=301)
+
+
 @app.route("/catalog/<path:product_id>")
 def catalog_detail_legacy(product_id: str):
-    """301 redirect old /catalog/<id> URLs to /search/<id>."""
-    return redirect(f"/search/{product_id}", code=301)
+    """301 redirect old /catalog/<id> URLs to /search/?q=<id>."""
+    return redirect(f"/search/?q={quote(product_id, safe=':')}", code=301)
 
 
 @app.route("/api/search")
@@ -1006,7 +1024,7 @@ SITEMAP_CHUNK  = 50_000   # max URLs per sitemap file (Google limit: 50k)
 
 _STATIC_PAGES: List[Tuple[str, str, str]] = [
     ("/",                                                    "1.0", "weekly"),
-    ("/search",                                              "0.9", "daily"),
+    ("/search/",                                             "0.9", "daily"),
     ("/services",                                            "0.8", "monthly"),
     ("/about",                                               "0.7", "monthly"),
     ("/quality",                                             "0.7", "monthly"),
@@ -1100,7 +1118,7 @@ def sitemap_products(chunk: int):
                         break
                     for pid, updated_at in rows:
                         safe_pid = _html.escape(str(pid))
-                        loc = f"{SITE_BASE}/search/{safe_pid}"
+                        loc = f"{SITE_BASE}/search/?q={quote(str(pid), safe=':')}"
                         lastmod = (
                             f"<lastmod>{updated_at.date().isoformat()}</lastmod>"
                             if updated_at else ""

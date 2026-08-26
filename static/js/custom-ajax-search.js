@@ -17,7 +17,7 @@ jQuery(document).ready(function ($) {
           const searchQuery = `${manufacturer.name} ${partName}`;
 
           wrapperItems.append(`
-            <a href="/search?q=${encodeURIComponent(searchQuery)}">
+            <a href="/search/?query=${encodeURIComponent(searchQuery)}">
               <span>${manufacturer.name}</span> ${partName}
             </a>
           `);
@@ -31,7 +31,7 @@ jQuery(document).ready(function ($) {
   btnSearch.on('click', function () {
     const query = $("#search-input").val();
     if (query.trim()) {
-      window.location.href = `/search?q=${encodeURIComponent(query)}`;
+      window.location.href = `/search/?query=${encodeURIComponent(query)}`;
     }
   });
 
