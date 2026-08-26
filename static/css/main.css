@@ -2262,6 +2262,7 @@ font-size: 1.2133vw;
 .home_page .six_item.active {
   background: rgba(50, 50, 51, 0.3);
   border-color: #141414;
+  z-index: 2;
 }
 .home_page .six_item_inner {
   position: relative;
@@ -2280,6 +2281,7 @@ font-size: 1.2133vw;
 .home_page .six_item_content {
   margin-left: 1.9791vw;
   margin-right: auto;
+  max-width: 48%;
 }
 .home_page .six_item_title {
   margin: 0 0 0.4166vw;
@@ -2299,6 +2301,8 @@ font-size: 1.2133vw;
   width: 28.6458vw;
   height: 19.0625vw;
   opacity: 0;
+  z-index: 3;
+  pointer-events: none;
   transition: all 0.6s ease-in-out;
 }
 .home_page .six_item_image img {
