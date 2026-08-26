@@ -2907,6 +2907,7 @@ font-size: 1.2133vw;
   }
   .home_page .six_item_content {
     margin: 0;
+    max-width: none;
   }
   .home_page .six_item_title {
     margin: 0 0 3.4666vw;
