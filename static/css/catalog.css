@@ -202,7 +202,16 @@
 
 .detail-pn-row { display: flex; align-items: center; gap: .6rem; margin-bottom: 1rem; }
 .detail-pn-label { font-size: .8rem; color: #666; }
-.detail-pn-value { font-family: monospace; font-size: 1rem; color: #e0e0e0; background: #141414; padding: .2rem .6rem; border: 1px solid rgba(255,255,255,.1); }
+.detail-pn-value {
+  font-family: monospace;
+  font-size: clamp(1.25rem, 2.4vw, 1.75rem);
+  font-weight: 700;
+  color: #fff;
+  background: #141414;
+  padding: .3rem .75rem;
+  border: 1px solid rgba(255,255,255,.1);
+  letter-spacing: .02em;
+}
 
 .detail-avail-row { display: flex; align-items: center; gap: .5rem; font-size: .88rem; color: #888; margin-bottom: 1.5rem; }
 .detail-avail-dot { width: 8px; height: 8px; background: #B6F223; border-radius: 50%; flex-shrink: 0; }
