@@ -207,7 +207,7 @@
   color: #fff;
   letter-spacing: .04em;
 }
-.detail-pn-value { font-family: monospace; font-size: 1rem; color: #e0e0e0; background: #141414; padding: .2rem .6rem; border: 1px solid rgba(255,255,255,.1); }
+.detail-pn-value { font-family: monospace; font-size: 1.15rem; color: #e0e0e0; background: #141414; padding: .25rem .65rem; border: 1px solid rgba(255,255,255,.1); }
 
 .detail-avail-row { display: flex; align-items: center; gap: .5rem; font-size: .88rem; color: #888; margin-bottom: 1.5rem; }
 .detail-avail-dot { width: 8px; height: 8px; background: #B6F223; border-radius: 50%; flex-shrink: 0; }
