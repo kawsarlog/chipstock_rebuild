@@ -26,9 +26,8 @@
           <img src="{{ product.image_url | proxy_img }}" alt="{{ product.manufacturer or '' }} {{ product.product_id }}">
         </div>
         {% else %}
-        <div class="detail-image-placeholder">
-          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" opacity="0.3"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-          <p>No image available</p>
+        <div class="detail-image-wrap">
+          <img src="/static/uploads/2025/04/image_3.png" alt="{{ product.manufacturer or '' }} {{ product.product_id }}">
         </div>
         {% endif %}
 
@@ -134,7 +133,7 @@
             {% if r.image_url %}
             <img src="{{ r.image_url | proxy_img }}" alt="{{ r.manufacturer or '' }}" loading="lazy">
             {% else %}
-            <div class="related-card-noimg">No Image</div>
+            <img src="/static/uploads/2025/04/image_3.png" alt="" loading="lazy">
             {% endif %}
           </div>
           <div class="related-card-body">
