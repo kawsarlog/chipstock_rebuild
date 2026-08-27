@@ -19,63 +19,72 @@
 
     <div class="detail-layout">
 
-      {# Image panel #}
-      <div class="detail-image-panel">
-        {% if product.image_url %}
-        <div class="detail-image-wrap">
-          <img src="{{ product.image_url | proxy_img }}" alt="{{ product.manufacturer or '' }} {{ product.product_id }}">
-        </div>
-        {% else %}
-        <div class="detail-image-wrap">
-          <img src="/static/uploads/2025/04/image_3.png" alt="{{ product.manufacturer or '' }} {{ product.product_id }}">
-        </div>
-        {% endif %}
-
-      </div>
-
-      {# Info panel #}
-      <div class="detail-info-panel">
-        {% if product.manufacturer %}
-        <div class="detail-manufacturer">{{ product.manufacturer }}</div>
-        {% endif %}
-
-        <div class="detail-pn-row">
-          <span class="detail-pn-label">Part Number</span>
-          <strong class="detail-pn-value">{{ product.product_id }}</strong>
-        </div>
-
-        <h1 class="detail-title">{{ product.description or product.product_id }}</h1>
-
-        <div class="detail-avail-row">
-          <span class="detail-avail-dot"></span>
-          <strong>Stock available — quantity subject to prior sale</strong>
-        </div>
-
-        <div class="detail-actions">
-          <a href="#" class="main_button_basic button_basic"
-             data-open-quote-modal
-             data-part-number="{{ product.product_id }}"
-             data-product-name="{{ (product.description or product.product_id)[:100] }}">
-            <span>Request a Quote</span>
-          </a>
-          <a href="mailto:rfq@chip-stock.com?subject=RFQ: {{ product.product_id }}" class="detail-email-link">
-            Or email: rfq@chip-stock.com
-          </a>
-        </div>
-
-        <div class="detail-meta-grid">
-          {% if product.category %}
-          <div class="detail-meta-item">
-            <span class="detail-meta-label">Category</span>
-            <span class="detail-meta-val">{{ product.category }}</span>
+      {# Left stack: product image + info, then quality banner in the blank strip #}
+      <div class="detail-main">
+        <div class="detail-product-row">
+          {# Image panel #}
+          <div class="detail-image-panel">
+            {% if product.image_url %}
+            <div class="detail-image-wrap">
+              <img src="{{ product.image_url | proxy_img }}" alt="{{ product.manufacturer or '' }} {{ product.product_id }}">
+            </div>
+            {% else %}
+            <div class="detail-image-wrap">
+              <img src="/static/uploads/2025/04/image_3.png" alt="{{ product.manufacturer or '' }} {{ product.product_id }}">
+            </div>
+            {% endif %}
           </div>
-          {% endif %}
-          {% if product.subcategory %}
-          <div class="detail-meta-item">
-            <span class="detail-meta-label">Subcategory</span>
-            <span class="detail-meta-val">{{ product.subcategory }}</span>
+
+          {# Info panel #}
+          <div class="detail-info-panel">
+            {% if product.manufacturer %}
+            <div class="detail-manufacturer">{{ product.manufacturer }}</div>
+            {% endif %}
+
+            <div class="detail-pn-row">
+              <span class="detail-pn-label">Part Number</span>
+              <strong class="detail-pn-value">{{ product.product_id }}</strong>
+            </div>
+
+            <h1 class="detail-title">{{ product.description or product.product_id }}</h1>
+
+            <div class="detail-avail-row">
+              <span class="detail-avail-dot"></span>
+              <strong>Stock available — quantity subject to prior sale</strong>
+            </div>
+
+            <div class="detail-actions">
+              <a href="#" class="main_button_basic button_basic"
+                 data-open-quote-modal
+                 data-part-number="{{ product.product_id }}"
+                 data-product-name="{{ (product.description or product.product_id)[:100] }}">
+                <span>Request a Quote</span>
+              </a>
+              <a href="mailto:rfq@chip-stock.com?subject=RFQ: {{ product.product_id }}" class="detail-email-link">
+                Or email: rfq@chip-stock.com
+              </a>
+            </div>
+
+            <div class="detail-meta-grid">
+              {% if product.category %}
+              <div class="detail-meta-item">
+                <span class="detail-meta-label">Category</span>
+                <span class="detail-meta-val">{{ product.category }}</span>
+              </div>
+              {% endif %}
+              {% if product.subcategory %}
+              <div class="detail-meta-item">
+                <span class="detail-meta-label">Subcategory</span>
+                <span class="detail-meta-val">{{ product.subcategory }}</span>
+              </div>
+              {% endif %}
+            </div>
           </div>
-          {% endif %}
+        </div>
+
+        {# Quality banner — only in the blank strip under image + part info #}
+        <div class="detail-quality-banner">
+          <img src="/static/uploads/2025/04/image_5.png" alt="Quality you can verify" loading="lazy" width="1740" height="165">
         </div>
       </div>
 
@@ -100,11 +109,6 @@
       </div>
 
     </div>{# /detail-layout #}
-
-    {# Quality banner — sits in the gap between product row and specs #}
-    <div class="detail-quality-banner">
-      <img src="/static/uploads/2025/04/image_5.png" alt="Quality you can verify" loading="lazy" width="1775" height="200">
-    </div>
 
     {# Specs table #}
     {% if product.specs_html %}

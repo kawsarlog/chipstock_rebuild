@@ -176,15 +176,31 @@
 .breadcrumb-sep { color: #333; }
 
 .detail-layout {
-  display: grid; grid-template-columns: 380px 1fr minmax(260px, 320px); gap: 2rem 3rem;
-  padding: 1.5rem 0 0.5rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 320px);
+  gap: 2rem 3rem;
+  padding: 1.5rem 0 0;
+  align-items: start;
+}
+.detail-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+.detail-product-row {
+  display: grid;
+  grid-template-columns: 380px minmax(0, 1fr);
+  gap: 2rem 3rem;
+  align-items: start;
 }
 @media (max-width: 1100px) {
-  .detail-layout { grid-template-columns: 380px 1fr; }
-  .detail-quote-panel { grid-column: 1 / -1; max-width: 420px; }
+  .detail-layout { grid-template-columns: 1fr; }
+  .detail-quote-panel { max-width: 420px; }
 }
 @media (max-width: 800px) {
-  .detail-layout { grid-template-columns: 1fr; gap: 1.5rem; }
+  .detail-layout { gap: 1.5rem; }
+  .detail-product-row { grid-template-columns: 1fr; gap: 1.5rem; }
   .detail-quote-panel { max-width: none; }
 }
 
@@ -258,28 +274,27 @@
 }
 .detail-quote-status { margin: .25rem 0 0; min-height: 1.25rem; font-size: .84rem; }
 
-/* Quality banner between product layout and specs */
+/* Quality banner — fills blank strip under image + part info */
 .detail-quality-banner {
-  margin: 0.35rem 0 0;
+  margin: 0;
   padding: 0;
   background: transparent;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  width: 100%;
+  line-height: 0;
 }
 .detail-quality-banner img {
   display: block;
   width: 100%;
-  max-width: 1100px;
+  max-width: none;
   height: auto;
-  background: transparent;
+  background: #0B0B0B;
 }
 
 /* Specs table — white panel (matches original product detail) */
 .detail-specs-section {
   background: #fff;
   border: none;
-  margin: 0.75rem 0 0;
+  margin: 1.25rem 0 0;
   padding: 2rem 1.5rem 2.25rem;
 }
 .detail-specs-title {
