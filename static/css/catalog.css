@@ -198,7 +198,7 @@
 .badge-semi   { background: #1a1a2a; color: #99aaff; border: 1px solid #99aaff; }
 
 .detail-manufacturer { font-size: .85rem; color: #B6F223; text-transform: uppercase; letter-spacing: .07em; margin-bottom: .6rem; }
-.detail-title { font-size: clamp(1rem, 2vw, 1.35rem); color: #ccc; margin: 0 0 1.2rem; line-height: 1.4; font-weight: 400; }
+.detail-title { font-size: clamp(0.78rem, 1.1vw, 0.9rem); color: #aaa; margin: 0 0 0.75rem; line-height: 1.35; font-weight: 400; }
 
 .detail-pn-row { display: flex; align-items: center; gap: .6rem; margin-bottom: 1rem; }
 .detail-pn-label {
