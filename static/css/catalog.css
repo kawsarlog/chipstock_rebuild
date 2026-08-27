@@ -237,6 +237,11 @@
 .detail-avail-row strong { color: #B6F223; }
 
 .detail-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; }
+/* Slightly smaller than global .button_basic (was padding 0.9635vw 2.3958vw / font-size 0.9375vw) */
+.detail-actions .main_button_basic.button_basic {
+  padding: 0.84vw 2.1vw;
+  font-size: 0.82vw;
+}
 .detail-email-link { font-size: .85rem; color: #B6F223; text-decoration: underline; }
 
 .detail-meta-grid { display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; margin-top: .5rem; }
