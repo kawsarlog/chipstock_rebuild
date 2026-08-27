@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 {% block title %}Chipstock — Global Electronic Components Distributor{% endblock %}
 
+{% block extra_head %}
+<link rel="preload" as="image" href="/static/uploads/2025/04/poster.webp" type="image/webp" fetchpriority="high">
+{% endblock %}
+
 {% block content %}
 {% set U = "/static/uploads" %}
 <main class="home_page">
@@ -23,8 +27,8 @@
             <p class="first_text">Reliable sourcing. From shortages to obsolete parts we get you the parts you need, on time.</p>
         </div>
         <div class="first_video">
-            <video loop autoplay muted playsinline poster="{{ U }}/2025/04/poster.webp">
-                <source src="{{ U }}/2025/04/Chip-Stock-Homepage-Hero-No-Logo-No-Audio.mp4" type="video/mp4">
+            <video loop autoplay muted playsinline preload="metadata" poster="{{ U }}/2025/04/poster.webp">
+                <source src="{{ U }}/2025/04/Chip-Stock-Homepage-Hero-720p.mp4" type="video/mp4">
             </video>
         </div>
     </section>
