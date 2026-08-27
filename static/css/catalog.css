@@ -258,6 +258,23 @@
 }
 .detail-quote-status { margin: .25rem 0 0; min-height: 1.25rem; font-size: .84rem; }
 
+/* Quality banner between product layout and specs (transparent PNG) */
+.detail-quality-banner {
+  margin: 1.75rem 0 0;
+  padding: 0;
+  background: transparent;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.detail-quality-banner img {
+  display: block;
+  width: 100%;
+  max-width: 1100px;
+  height: auto;
+  background: transparent;
+}
+
 /* Specs table — white panel (matches original product detail) */
 .detail-specs-section {
   background: #fff;
