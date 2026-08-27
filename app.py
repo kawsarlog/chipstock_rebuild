@@ -999,9 +999,15 @@ def request_quote():
         for k in ("name", "phone", "email", "quantity", "part_number",
                   "message", "product_name", "page_url")
     }
-    missing = [k for k in ("name", "phone", "email", "quantity", "message") if not fields[k]]
+    missing = [k for k in ("name", "email") if not fields[k]]
     if missing:
         return jsonify({"ok": False, "error": "Please fill in all required fields."}), 400
+    if not fields["phone"]:
+        fields["phone"] = "—"
+    if not fields["quantity"]:
+        fields["quantity"] = "—"
+    if not fields["message"]:
+        fields["message"] = "Quote request submitted from product page."
     if not _valid_email(fields["email"]):
         return jsonify({"ok": False, "error": "Please provide a valid email address."}), 400
     if len(fields["message"]) > 5000:

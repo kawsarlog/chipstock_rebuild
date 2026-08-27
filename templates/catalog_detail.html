@@ -80,6 +80,26 @@
         </div>
       </div>
 
+      {# Inline quote form #}
+      <div class="detail-quote-panel">
+        <div class="detail-quote-card">
+          <h2 class="detail-quote-title">Request a Quote</h2>
+          <p class="detail-quote-subtitle">Get pricing and availability for this part.</p>
+          <form id="cs-detail-quote-form" novalidate>
+            <label class="detail-quote-label" for="detail-quote-name">Name</label>
+            <input type="text" id="detail-quote-name" class="cs-input detail-quote-input" name="name" placeholder="Your Name*" required maxlength="150">
+            <label class="detail-quote-label" for="detail-quote-email">Email</label>
+            <input type="email" id="detail-quote-email" class="cs-input detail-quote-input" name="email" placeholder="Email*" required maxlength="190">
+            <label class="detail-quote-label" for="detail-quote-pn">Part Number</label>
+            <input type="text" id="detail-quote-pn" class="cs-input detail-quote-input detail-quote-pn" name="part_number" value="{{ product.product_id }}" readonly maxlength="190">
+            <input type="hidden" name="product_name" value="{{ (product.description or product.product_id)[:100] }}">
+            <input type="hidden" name="page_url" value="">
+            <button type="submit" class="cs-btn detail-quote-submit">Request a Quote</button>
+            <p class="cs-quote-status detail-quote-status" id="cs-detail-quote-status" role="status" aria-live="polite"></p>
+          </form>
+        </div>
+      </div>
+
     </div>{# /detail-layout #}
 
     {# Specs table #}

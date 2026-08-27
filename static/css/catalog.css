@@ -176,10 +176,17 @@
 .breadcrumb-sep { color: #333; }
 
 .detail-layout {
-  display: grid; grid-template-columns: 380px 1fr; gap: 3rem;
+  display: grid; grid-template-columns: 380px 1fr minmax(260px, 320px); gap: 2rem 3rem;
   padding: 1.5rem 0 2.5rem;
 }
-@media (max-width: 800px) { .detail-layout { grid-template-columns: 1fr; gap: 1.5rem; } }
+@media (max-width: 1100px) {
+  .detail-layout { grid-template-columns: 380px 1fr; }
+  .detail-quote-panel { grid-column: 1 / -1; max-width: 420px; }
+}
+@media (max-width: 800px) {
+  .detail-layout { grid-template-columns: 1fr; gap: 1.5rem; }
+  .detail-quote-panel { max-width: none; }
+}
 
 .detail-image-panel { position: relative; }
 .detail-image-wrap {
@@ -220,6 +227,36 @@
 .detail-meta-item { display: flex; flex-direction: column; gap: .15rem; }
 .detail-meta-label { font-size: .72rem; color: #555; text-transform: uppercase; letter-spacing: .06em; }
 .detail-meta-val { font-size: .88rem; color: #ccc; }
+
+/* Inline quote form (product detail) */
+.detail-quote-panel { align-self: start; }
+.detail-quote-card {
+  background: #111; border: 1px solid rgba(255,255,255,.12);
+  padding: 1.5rem; border-radius: 2px;
+}
+.detail-quote-title { color: #fff; font-size: 1.15rem; margin: 0 0 .35rem; font-weight: 600; }
+.detail-quote-subtitle { color: #888; font-size: .85rem; margin: 0 0 1.25rem; line-height: 1.5; }
+#cs-detail-quote-form { display: flex; flex-direction: column; gap: .65rem; }
+.detail-quote-label {
+  font-size: .72rem; color: #888; text-transform: uppercase;
+  letter-spacing: .06em; margin-bottom: -.35rem;
+}
+#cs-detail-quote-form .detail-quote-input {
+  min-width: 0; background: #050505; border: 1px solid #2f2f2f;
+  color: #eee; min-height: 2.75rem; font-size: .95rem; padding: .65rem .85rem;
+  border-radius: 2px; width: 100%; box-sizing: border-box;
+}
+#cs-detail-quote-form .detail-quote-input:focus {
+  outline: none; border-color: #B6F223;
+}
+#cs-detail-quote-form .detail-quote-pn {
+  font-family: monospace; color: #ccc; background: #141414; cursor: default;
+}
+.detail-quote-submit {
+  width: 100%; min-height: 2.85rem; margin-top: .35rem;
+  font-size: .95rem; font-weight: 600;
+}
+.detail-quote-status { margin: .25rem 0 0; min-height: 1.25rem; font-size: .84rem; }
 
 /* Specs table — white panel (matches original product detail) */
 .detail-specs-section {
