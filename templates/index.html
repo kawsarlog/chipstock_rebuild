@@ -448,6 +448,18 @@
 
 {% block extra_js %}
 <script>
+/* ── Hero video: ensure infinite loop (fallback when native loop fails) ── */
+(function () {
+    var video = document.querySelector('.first_video video');
+    if (!video) return;
+    video.loop = true;
+    video.addEventListener('ended', function () {
+        video.currentTime = 0;
+        video.play();
+    });
+})();
+</script>
+<script>
 /* ── Scroll-spy: highlight the on-page section number + matching nav item in brand green ── */
 (function () {
     var map = [
