@@ -519,7 +519,8 @@ body.cs-header-menu-open .header_backdrop {
   position: absolute;
   top: 50%;
   left: 50%;
-  z-index: 0;
+  /* Behind label text (raw text nodes have no z-index; z-index:0 covered them) */
+  z-index: -1;
   width: max(240%, 17rem);
   aspect-ratio: 1;
   border-radius: 50%;

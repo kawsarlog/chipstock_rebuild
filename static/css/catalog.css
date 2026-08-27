@@ -468,13 +468,33 @@ body .bottom_section_title .border { color: #B6F223 !important; border-color: rg
 .footer_link .main_button_basic.button_basic:hover,
 .header_mob_link .main_button_basic.button_basic:hover { color: #0a0a0a !important; }
 
-/* Detail page "Request a Quote" CTAs — match Get my Quote (cs-btn) gray hover */
+/* Detail page "Request a Quote" CTAs — gray hover + black text, no underline */
+.detail-actions .main_button_basic.button_basic,
+.detail-cta-strip .main_button_basic.button_basic,
+.detail-actions .main_button_basic.button_basic:hover,
+.detail-cta-strip .main_button_basic.button_basic:hover {
+  text-decoration: none;
+}
+.detail-actions .main_button_basic.button_basic span,
+.detail-cta-strip .main_button_basic.button_basic span,
+.detail-actions .main_button_basic.button_basic:hover span,
+.detail-cta-strip .main_button_basic.button_basic:hover span {
+  text-decoration: none;
+  color: inherit;
+}
 .detail-actions .main_button_basic.button_basic:after,
 .detail-cta-strip .main_button_basic.button_basic:after {
   background: #d4d4d4;
 }
 .detail-actions .main_button_basic.button_basic:hover,
 .detail-cta-strip .main_button_basic.button_basic:hover {
+  color: #0a0a0a;
+  text-decoration: none;
+}
+
+/* Get my Quote — keep black text visible on gray hover disk */
+.detail-quote-submit.cs-btn:hover,
+#cs-detail-quote-form .cs-btn:hover {
   color: #0a0a0a;
 }
 
