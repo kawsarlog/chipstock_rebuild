@@ -463,10 +463,20 @@ body.cs-modal-open { overflow: hidden; }
 /* ── "Delivering without compromise." — lime highlight ── */
 body .bottom_section_title .border { color: #B6F223 !important; border-color: rgba(182,242,35,.5) !important; }
 
-/* ── Button hover — keep text dark (overrides main.css lime-on-hover) ── */
+/* ── Button hover — gray bg + black text (overrides main.css white/lime hover) ── */
 .header_link .main_button_basic.button_basic:hover,
 .footer_link .main_button_basic.button_basic:hover,
 .header_mob_link .main_button_basic.button_basic:hover { color: #0a0a0a !important; }
+
+/* Detail page "Request a Quote" CTAs — match Get my Quote (cs-btn) gray hover */
+.detail-actions .main_button_basic.button_basic:after,
+.detail-cta-strip .main_button_basic.button_basic:after {
+  background: #d4d4d4;
+}
+.detail-actions .main_button_basic.button_basic:hover,
+.detail-cta-strip .main_button_basic.button_basic:hover {
+  color: #0a0a0a;
+}
 
 /* ── Service cards — hover shows green panel + description text ── */
 .home_page .third_item_inner { transition: background-color .3s ease; }
