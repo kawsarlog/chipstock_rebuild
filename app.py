@@ -876,10 +876,28 @@ def proxy_img_filter(url: Optional[str]) -> str:
     return url_for("catalog_image_proxy", token=_img_b64enc(url))
 
 
+_ANCHOR_TAG = re.compile(r"<a\b[^>]*>(.*?)</a>", re.IGNORECASE | re.DOTALL)
+
+
+def _strip_spec_anchor_tags(html: Optional[str]) -> str:
+    """Remove anchor tags from specs HTML, keeping inner text."""
+    if not html:
+        return ""
+    out = html
+    while True:
+        new = _ANCHOR_TAG.sub(r"\1", out)
+        if new == out:
+            return new
+        out = new
+
+
 def _render_product_detail(product_id: str):
     product = fetch_product(product_id)
     if not product:
         abort(404)
+    specs = product.get("specs_html")
+    if specs:
+        product["specs_html"] = _strip_spec_anchor_tags(specs)
     related = fetch_related(
         product_id,
         product.get("manufacturer"),
