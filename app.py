@@ -1163,7 +1163,7 @@ def sitemap_products(chunk: int):
             cur.execute("SELECT COUNT(*) FROM public.products")
             total = cur.fetchone()[0]
     finally:
-        db2.close()
+        _put(db2)
 
     if offset >= total:
         abort(404)
