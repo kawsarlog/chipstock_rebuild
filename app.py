@@ -21,6 +21,7 @@ from urllib.parse import quote, urlencode, urlparse
 
 import functools
 import uuid
+from contextlib import contextmanager
 
 import psycopg2
 import psycopg2.pool
@@ -92,7 +93,7 @@ SUBCAT_LABELS: Dict[str, str] = {
 }
 
 
-_pool = psycopg2.pool.ThreadedConnectionPool(minconn=2, maxconn=10, **_DB)
+_pool = psycopg2.pool.ThreadedConnectionPool(minconn=2, maxconn=20, **_DB)
 
 
 def _conn():
@@ -102,10 +103,22 @@ def _conn():
 
 
 def _put(c):
+    if c is None:
+        return
     try:
         _pool.putconn(c)
     except Exception:
         pass
+
+
+@contextmanager
+def _db():
+    """Acquire a pooled connection; always return it via _put(), even on error."""
+    conn = _conn()
+    try:
+        yield conn
+    finally:
+        _put(conn)
 
 
 # ── Admin / Blog ─────────────────────────────────────────────────────────────
@@ -988,25 +1001,23 @@ def api_search():
     nq = _norm(q)
     if not nq:
         return jsonify([])
-    db = _conn()
     try:
-        with db.cursor() as cur:
-            cur.execute(
-                """SELECT product_id, manufacturer, description
-                   FROM public.products
-                   WHERE regexp_replace(lower(COALESCE(product_id,'')), '[^a-z0-9]', '', 'g') LIKE %s
-                      OR regexp_replace(lower(COALESCE(description,'')), '[^a-z0-9]', '', 'g') LIKE %s
-                   LIMIT 8""",
-                [f"%{nq}%"] * 2,
-            )
-            return jsonify([
-                {"pid": r[0], "mfr": r[1] or "", "desc": (r[2] or "")[:70]}
-                for r in cur.fetchall()
-            ])
+        with _db() as db:
+            with db.cursor() as cur:
+                cur.execute(
+                    """SELECT product_id, manufacturer, description
+                       FROM public.products
+                       WHERE regexp_replace(lower(COALESCE(product_id,'')), '[^a-z0-9]', '', 'g') LIKE %s
+                          OR regexp_replace(lower(COALESCE(description,'')), '[^a-z0-9]', '', 'g') LIKE %s
+                       LIMIT 8""",
+                    [f"%{nq}%"] * 2,
+                )
+                return jsonify([
+                    {"pid": r[0], "mfr": r[1] or "", "desc": (r[2] or "")[:70]}
+                    for r in cur.fetchall()
+                ])
     except Exception:
         return jsonify([])
-    finally:
-        _put(db)
 
 
 @app.route("/api/request-quote", methods=["POST"])
@@ -1076,13 +1087,10 @@ def robots_txt():
 
 @app.route("/sitemap.xml")
 def sitemap_index():
-    db = _conn()
-    try:
+    with _db() as db:
         with db.cursor() as cur:
             cur.execute("SELECT COUNT(*) FROM public.products")
             total: int = cur.fetchone()[0]
-    finally:
-        _put(db)
 
     num_chunks = math.ceil(total / SITEMAP_CHUNK)
     today = datetime.date.today().isoformat()
@@ -1124,11 +1132,19 @@ def sitemap_products(chunk: int):
         abort(404)
     offset = (chunk - 1) * SITEMAP_CHUNK
 
+    with _db() as db:
+        with db.cursor() as cur:
+            cur.execute("SELECT COUNT(*) FROM public.products")
+            total = cur.fetchone()[0]
+
+    if offset >= total:
+        abort(404)
+
     def _generate() -> Generator[str, None, None]:
         yield '<?xml version="1.0" encoding="UTF-8"?>\n'
         yield '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-        db = _conn()
-        try:
+        # _db() ensures the connection is returned even if the client aborts mid-stream.
+        with _db() as db:
             with db.cursor("sitemap_cursor") as cur:  # server-side cursor
                 cur.execute(
                     """SELECT product_id, updated_at FROM public.products
@@ -1141,7 +1157,6 @@ def sitemap_products(chunk: int):
                     if not rows:
                         break
                     for pid, updated_at in rows:
-                        safe_pid = _html.escape(str(pid))
                         loc = f"{SITE_BASE}/search/?q={quote(str(pid), safe=':')}"
                         lastmod = (
                             f"<lastmod>{updated_at.date().isoformat()}</lastmod>"
@@ -1152,21 +1167,7 @@ def sitemap_products(chunk: int):
                             f"<changefreq>monthly</changefreq>"
                             f"<priority>0.5</priority></url>\n"
                         )
-        finally:
-            _put(db)
         yield '</urlset>\n'
-
-    # Check chunk exists (quick count check)
-    db2 = _conn()
-    try:
-        with db2.cursor() as cur:
-            cur.execute("SELECT COUNT(*) FROM public.products")
-            total = cur.fetchone()[0]
-    finally:
-        _put(db2)
-
-    if offset >= total:
-        abort(404)
 
     return Response(_generate(), mimetype="application/xml")
 
