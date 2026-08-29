@@ -68,8 +68,52 @@
 /* Product grid */
 .catalog-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr));
   gap: 1rem;
+}
+
+@media (max-width: 768px) {
+  .wrap {
+    padding-left: max(1rem, env(safe-area-inset-left, 0px));
+    padding-right: max(1rem, env(safe-area-inset-right, 0px));
+  }
+
+  .catalog-filter-section,
+  .catalog-results-section {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .catalog-cat-tabs {
+    gap: 0.35rem;
+  }
+
+  .catalog-cat-tab {
+    font-size: 0.75rem;
+    padding: 0.45rem 0.65rem;
+  }
+
+  .catalog-selects-row {
+    flex-direction: column;
+  }
+
+  .catalog-select,
+  .catalog-select-wide {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .detail-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .detail-quote-panel {
+    position: static;
+    width: 100%;
+    max-width: none;
+  }
 }
 
 /* Card — S42-style diagonal lime sweep hover */
