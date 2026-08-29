@@ -1504,13 +1504,16 @@ footer.site-footer,
   }
 
   .footer_contacts {
-    padding-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding-bottom: 1rem;
     border-bottom: 1px solid #222;
   }
 
   .footer_tel,
   .footer_email {
-    margin-bottom: 1rem !important;
+    margin-bottom: 0 !important;
   }
 
   .footer_contacts a,
