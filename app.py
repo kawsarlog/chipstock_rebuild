@@ -976,6 +976,44 @@ def proxy_img_filter(url: Optional[str]) -> str:
 
 _ANCHOR_TAG = re.compile(r"<a\b[^>]*>(.*?)</a>", re.IGNORECASE | re.DOTALL)
 
+# Blocked display keywords from upstream ServerSupply catalog data (case-insensitive).
+_SERVERSUPPLY_KW = re.compile(r"server\s*supply", re.IGNORECASE)
+_REFURBISHED_KW = re.compile(r"refurbished", re.IGNORECASE)
+_SPEC_ROW = re.compile(r"<tr\b[^>]*>.*?</tr>", re.IGNORECASE | re.DOTALL)
+_SPEC_CELL = re.compile(r"<t[hd]\b[^>]*>(.*?)</t[hd]>", re.IGNORECASE | re.DOTALL)
+_HTML_TAG = re.compile(r"<[^>]+>")
+
+
+def _plain_text(fragment: str) -> str:
+    return _HTML_TAG.sub("", fragment or "").strip()
+
+
+def _has_blocked_keyword(text: str) -> bool:
+    if not text:
+        return False
+    return bool(_SERVERSUPPLY_KW.search(text) or _REFURBISHED_KW.search(text))
+
+
+def _scrub_blocked_keywords(text: Optional[str]) -> str:
+    """Remove blocked keywords from plain display text."""
+    if not text:
+        return ""
+    out = _SERVERSUPPLY_KW.sub("", text)
+    out = _REFURBISHED_KW.sub("", out)
+    out = re.sub(r"\s{2,}", " ", out)
+    out = re.sub(r"[\s.,;:()\-]+$", "", out.strip())
+    out = re.sub(r"^[\s.,;:()\-]+", "", out)
+    return out.strip()
+
+
+def _should_drop_spec_row(label: str, value: str) -> bool:
+    """Drop a spec row when label/value contain blocked keywords."""
+    if _SERVERSUPPLY_KW.search(label) or _SERVERSUPPLY_KW.search(value):
+        return True
+    if _REFURBISHED_KW.search(value) or _REFURBISHED_KW.search(label):
+        return True
+    return False
+
 
 def _strip_spec_anchor_tags(html: Optional[str]) -> str:
     """Remove anchor tags from specs HTML, keeping inner text."""
@@ -989,19 +1027,55 @@ def _strip_spec_anchor_tags(html: Optional[str]) -> str:
         out = new
 
 
+def _filter_specs_html(html: Optional[str]) -> str:
+    """Drop spec table rows whose label or value contain blocked keywords."""
+    if not html:
+        return ""
+    html = _strip_spec_anchor_tags(html)
+
+    def _row_replacer(match: re.Match) -> str:
+        row = match.group(0)
+        cells = _SPEC_CELL.findall(row)
+        if len(cells) >= 2:
+            label = _plain_text(cells[0])
+            value = _plain_text(cells[1])
+            if _should_drop_spec_row(label, value):
+                return ""
+            return row
+        if _has_blocked_keyword(_plain_text(row)):
+            return ""
+        return row
+
+    filtered = _SPEC_ROW.sub(_row_replacer, html)
+    filtered = _SERVERSUPPLY_KW.sub("", filtered)
+    filtered = _REFURBISHED_KW.sub("", filtered)
+    return filtered.strip()
+
+
+def _sanitize_product(product: Dict) -> Dict:
+    """Scrub blocked keywords from product fields shown on the site."""
+    if product.get("description"):
+        product["description"] = _scrub_blocked_keywords(product["description"])
+    specs = product.get("specs_html")
+    if specs:
+        product["specs_html"] = _filter_specs_html(specs)
+    return product
+
+
 def _render_product_detail(product_id: str):
     product = fetch_product(product_id)
     if not product:
         abort(404)
-    specs = product.get("specs_html")
-    if specs:
-        product["specs_html"] = _strip_spec_anchor_tags(specs)
-    related = fetch_related(
-        product_id,
-        product.get("manufacturer"),
-        product.get("category"),
-        source=product.get("source"),
-    )
+    product = _sanitize_product(product)
+    related = [
+        _sanitize_product(r)
+        for r in fetch_related(
+            product_id,
+            product.get("manufacturer"),
+            product.get("category"),
+            source=product.get("source"),
+        )
+    ]
     return render_template("catalog_detail.html", product=product, related=related)
 
 
@@ -1049,6 +1123,7 @@ def catalog():
         rows, total = fetch_catalog_page(
             cat_key, page, sort, mfr=mfr_f, q=query or None, subcat=subcat or None
         )
+        rows = [_sanitize_product(r) for r in rows]
     except DbUnavailableError as exc:
         _log_db_error("catalog", exc)
         return _render_db_unavailable(
@@ -1115,7 +1190,11 @@ def api_search():
                     [f"%{nq}%"] * 2,
                 )
                 return jsonify([
-                    {"pid": r[0], "mfr": r[1] or "", "desc": (r[2] or "")[:70]}
+                    {
+                        "pid": r[0],
+                        "mfr": r[1] or "",
+                        "desc": _scrub_blocked_keywords(r[2] or "")[:70],
+                    }
                     for r in cur.fetchall()
                 ])
     except DbUnavailableError as exc:
