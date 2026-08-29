@@ -1,0 +1,13 @@
+<div class="db-error-banner" role="alert">
+  <div class="db-error-icon" aria-hidden="true">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="12" y1="8" x2="12" y2="12"/>
+      <line x1="12" y1="16" x2="12.01" y2="16"/>
+    </svg>
+  </div>
+  <div class="db-error-text">
+    <strong>{{ title or "Database temporarily unavailable" }}</strong>
+    <p>{{ message or "Product and blog content cannot be loaded right now. Please try again shortly." }}</p>
+  </div>
+</div>

@@ -93,20 +93,51 @@ SUBCAT_LABELS: Dict[str, str] = {
 }
 
 
-_pool = psycopg2.pool.ThreadedConnectionPool(minconn=2, maxconn=20, **_DB)
+_DB_ERRORS = (
+    psycopg2.OperationalError,
+    psycopg2.InterfaceError,
+    psycopg2.pool.PoolError,
+)
+
+_pool: Optional[psycopg2.pool.ThreadedConnectionPool] = None
+
+
+class DbUnavailableError(Exception):
+    """Raised when the database cannot be reached or the pool is exhausted."""
+
+
+def _log_db_error(context: str, exc: Exception) -> None:
+    app.logger.error("Database error [%s]: %s", context, exc)
+
+
+def _get_pool() -> psycopg2.pool.ThreadedConnectionPool:
+    global _pool
+    if _pool is None:
+        try:
+            _pool = psycopg2.pool.ThreadedConnectionPool(minconn=2, maxconn=20, **_DB)
+        except _DB_ERRORS as exc:
+            _log_db_error("pool init", exc)
+            raise DbUnavailableError(str(exc)) from exc
+    return _pool
 
 
 def _conn():
-    c = _pool.getconn()
-    c.autocommit = False
-    return c
+    try:
+        c = _get_pool().getconn()
+        c.autocommit = False
+        return c
+    except DbUnavailableError:
+        raise
+    except _DB_ERRORS as exc:
+        _log_db_error("connection", exc)
+        raise DbUnavailableError(str(exc)) from exc
 
 
 def _put(c):
     if c is None:
         return
     try:
-        _pool.putconn(c)
+        _get_pool().putconn(c)
     except Exception:
         pass
 
@@ -114,11 +145,48 @@ def _put(c):
 @contextmanager
 def _db():
     """Acquire a pooled connection; always return it via _put(), even on error."""
-    conn = _conn()
+    conn = None
     try:
+        conn = _conn()
         yield conn
+    except DbUnavailableError:
+        raise
+    except _DB_ERRORS as exc:
+        _log_db_error("query", exc)
+        raise DbUnavailableError(str(exc)) from exc
     finally:
         _put(conn)
+
+
+_DB_MSG = (
+    "Database temporarily unavailable. Product and blog content cannot be "
+    "loaded right now. Please try again shortly."
+)
+
+
+def _render_db_unavailable(
+    page_title: str = "Content Unavailable",
+    title: Optional[str] = None,
+    message: Optional[str] = None,
+    back_url: Optional[str] = None,
+    back_label: Optional[str] = None,
+    status: int = 503,
+):
+    return (
+        render_template(
+            "db_unavailable.html",
+            page_title=page_title,
+            title=title or "Database temporarily unavailable",
+            message=message or _DB_MSG,
+            back_url=back_url,
+            back_label=back_label,
+        ),
+        status,
+    )
+
+
+def _db_json_error():
+    return jsonify({"ok": False, "error": _DB_MSG}), 503
 
 
 # ── Admin / Blog ─────────────────────────────────────────────────────────────
@@ -139,8 +207,7 @@ def login_required(f):
 
 
 def _blog_get_all(include_drafts=False):
-    db = _conn()
-    try:
+    with _db() as db:
         with db.cursor() as cur:
             cond = "" if include_drafts else "WHERE status = 'published'"
             cur.execute(f"""
@@ -151,13 +218,10 @@ def _blog_get_all(include_drafts=False):
             """)
             cols = [d[0] for d in cur.description]
             return [dict(zip(cols, r)) for r in cur.fetchall()]
-    finally:
-        _put(db)
 
 
 def _blog_get_slug(slug):
-    db = _conn()
-    try:
+    with _db() as db:
         with db.cursor() as cur:
             cur.execute("""
                 SELECT id, title, slug, excerpt, content, featured_image, author,
@@ -169,13 +233,10 @@ def _blog_get_slug(slug):
                 return None
             cols = [d[0] for d in cur.description]
             return dict(zip(cols, row))
-    finally:
-        _put(db)
 
 
 def _blog_get_id(post_id):
-    db = _conn()
-    try:
+    with _db() as db:
         with db.cursor() as cur:
             cur.execute("""
                 SELECT id, title, slug, excerpt, content, featured_image, author,
@@ -187,79 +248,71 @@ def _blog_get_id(post_id):
                 return None
             cols = [d[0] for d in cur.description]
             return dict(zip(cols, row))
-    finally:
-        _put(db)
 
 
 def _blog_create(data):
-    db = _conn()
-    try:
-        with db.cursor() as cur:
-            pub_at = datetime.datetime.utcnow() if data.get("status") == "published" else None
-            cur.execute("""
-                INSERT INTO blog_posts (title, slug, excerpt, content, featured_image,
-                    author, category, news_section, tags, seo_title, seo_description, status, published_at)
-                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id
-            """, (
-                data["title"], data["slug"], data.get("excerpt"), data.get("content"),
-                data.get("featured_image"), data.get("author", "Chipstock Team"),
-                data.get("category"), data.get("news_section") or None, data.get("tags", []),
-                data.get("seo_title") or data["title"],
-                data.get("seo_description") or data.get("excerpt", ""),
-                data.get("status", "draft"), pub_at,
-            ))
-            post_id = cur.fetchone()[0]
-        db.commit()
-        return post_id
-    except Exception:
-        db.rollback()
-        raise
-    finally:
-        _put(db)
+    with _db() as db:
+        try:
+            with db.cursor() as cur:
+                pub_at = datetime.datetime.utcnow() if data.get("status") == "published" else None
+                cur.execute("""
+                    INSERT INTO blog_posts (title, slug, excerpt, content, featured_image,
+                        author, category, news_section, tags, seo_title, seo_description, status, published_at)
+                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id
+                """, (
+                    data["title"], data["slug"], data.get("excerpt"), data.get("content"),
+                    data.get("featured_image"), data.get("author", "Chipstock Team"),
+                    data.get("category"), data.get("news_section") or None, data.get("tags", []),
+                    data.get("seo_title") or data["title"],
+                    data.get("seo_description") or data.get("excerpt", ""),
+                    data.get("status", "draft"), pub_at,
+                ))
+                post_id = cur.fetchone()[0]
+            db.commit()
+            return post_id
+        except Exception:
+            db.rollback()
+            raise
 
 
 def _blog_update(post_id, data):
-    db = _conn()
-    try:
-        with db.cursor() as cur:
-            cur.execute("SELECT status, published_at FROM blog_posts WHERE id=%s", (post_id,))
-            row = cur.fetchone()
-            pub_at = row[1] if row else None
-            if data.get("status") == "published" and pub_at is None:
-                pub_at = datetime.datetime.utcnow()
-            cur.execute("""
-                UPDATE blog_posts SET
-                    title=%s, slug=%s, excerpt=%s, content=%s, featured_image=%s,
-                    author=%s, category=%s, news_section=%s, tags=%s, seo_title=%s, seo_description=%s,
-                    status=%s, published_at=%s, updated_at=NOW()
-                WHERE id=%s
-            """, (
-                data["title"], data["slug"], data.get("excerpt"), data.get("content"),
-                data.get("featured_image"), data.get("author", "Chipstock Team"),
-                data.get("category"), data.get("news_section") or None, data.get("tags", []),
-                data.get("seo_title") or data["title"],
-                data.get("seo_description") or data.get("excerpt", ""),
-                data.get("status", "draft"), pub_at, post_id,
-            ))
-        db.commit()
-    except Exception:
-        db.rollback()
-        raise
-    finally:
-        _put(db)
+    with _db() as db:
+        try:
+            with db.cursor() as cur:
+                cur.execute("SELECT status, published_at FROM blog_posts WHERE id=%s", (post_id,))
+                row = cur.fetchone()
+                pub_at = row[1] if row else None
+                if data.get("status") == "published" and pub_at is None:
+                    pub_at = datetime.datetime.utcnow()
+                cur.execute("""
+                    UPDATE blog_posts SET
+                        title=%s, slug=%s, excerpt=%s, content=%s, featured_image=%s,
+                        author=%s, category=%s, news_section=%s, tags=%s, seo_title=%s, seo_description=%s,
+                        status=%s, published_at=%s, updated_at=NOW()
+                    WHERE id=%s
+                """, (
+                    data["title"], data["slug"], data.get("excerpt"), data.get("content"),
+                    data.get("featured_image"), data.get("author", "Chipstock Team"),
+                    data.get("category"), data.get("news_section") or None, data.get("tags", []),
+                    data.get("seo_title") or data["title"],
+                    data.get("seo_description") or data.get("excerpt", ""),
+                    data.get("status", "draft"), pub_at, post_id,
+                ))
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
 
 
 def _blog_delete(post_id):
-    db = _conn()
-    try:
-        with db.cursor() as cur:
-            cur.execute("DELETE FROM blog_posts WHERE id=%s", (post_id,))
-        db.commit()
-    except Exception:
-        db.rollback()
-        raise
-    finally:
-        _put(db)
+    with _db() as db:
+        try:
+            with db.cursor() as cur:
+                cur.execute("DELETE FROM blog_posts WHERE id=%s", (post_id,))
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
 
 
 def _norm(s: str) -> str:
@@ -299,27 +352,25 @@ def fetch_catalog_page(
     where = " AND ".join(clauses) if clauses else "1=1"
     offset = (page - 1) * PER_PAGE
 
-    db = _conn()
-    try:
-        with db.cursor() as cur:
-            cur.execute(f"SELECT count(*) FROM public.products WHERE {where}", params)
-            total = int(cur.fetchone()[0])
-            cur.execute(
-                f"""SELECT product_id, manufacturer, description, image_url,
-                           category, subcategory, source
-                    FROM public.products WHERE {where}
-                    ORDER BY {order} LIMIT %s OFFSET %s""",
-                params + [PER_PAGE, offset],
-            )
-            cols = [d[0] for d in cur.description]
-            rows = [dict(zip(cols, r)) for r in cur.fetchall()]
-        db.commit()
-        return rows, total
-    except Exception:
-        db.rollback()
-        raise
-    finally:
-        _put(db)
+    with _db() as db:
+        try:
+            with db.cursor() as cur:
+                cur.execute(f"SELECT count(*) FROM public.products WHERE {where}", params)
+                total = int(cur.fetchone()[0])
+                cur.execute(
+                    f"""SELECT product_id, manufacturer, description, image_url,
+                               category, subcategory, source
+                        FROM public.products WHERE {where}
+                        ORDER BY {order} LIMIT %s OFFSET %s""",
+                    params + [PER_PAGE, offset],
+                )
+                cols = [d[0] for d in cur.description]
+                rows = [dict(zip(cols, r)) for r in cur.fetchall()]
+            db.commit()
+            return rows, total
+        except Exception:
+            db.rollback()
+            raise
 
 
 def fetch_subcats(cat_key: str) -> List[Tuple[str, str]]:
@@ -327,8 +378,7 @@ def fetch_subcats(cat_key: str) -> List[Tuple[str, str]]:
     if cat_key not in ("ALL", "SEMICONDUCTORS"):
         return []
     extra = "source = 'vyrian' AND " if cat_key == "SEMICONDUCTORS" else ""
-    db = _conn()
-    try:
+    with _db() as db:
         with db.cursor() as cur:
             cur.execute(
                 f"SELECT category, count(*) FROM public.products "
@@ -340,8 +390,6 @@ def fetch_subcats(cat_key: str) -> List[Tuple[str, str]]:
                 (r[0], SUBCAT_LABELS.get(r[0], r[0].replace("-", " ").title()))
                 for r in cur.fetchall()
             ]
-    finally:
-        _put(db)
 
 
 def fetch_manufacturers(cat_key: str, subcat: Optional[str] = None) -> List[str]:
@@ -352,8 +400,7 @@ def fetch_manufacturers(cat_key: str, subcat: Optional[str] = None) -> List[str]
         params.append(subcat)
     clauses.append("TRIM(COALESCE(manufacturer,''))<>''")
     where = " AND ".join(clauses)
-    db = _conn()
-    try:
+    with _db() as db:
         with db.cursor() as cur:
             cur.execute(
                 f"SELECT TRIM(manufacturer) AS m, count(*) FROM public.products "
@@ -361,71 +408,68 @@ def fetch_manufacturers(cat_key: str, subcat: Optional[str] = None) -> List[str]
                 params,
             )
             return [r[0] for r in cur.fetchall() if r[0]]
-    finally:
-        _put(db)
 
 
 def fetch_related(pid: str, manufacturer: Optional[str], category: Optional[str], source: Optional[str] = None, limit: int = 5) -> List[Dict]:
     """Fetch similar products: same category → same manufacturer → same source (random fallback)."""
     COLS = "product_id, manufacturer, description, image_url, category"
-    db = _conn()
-    try:
-        with db.cursor() as cur:
-            results: list = []
+    with _db() as db:
+        try:
+            with db.cursor() as cur:
+                results: list = []
 
-            # 1) Same category, manufacturer priority
-            if category:
-                cur.execute(
-                    f"""SELECT {COLS} FROM public.products
-                        WHERE product_id <> %s AND category = %s
-                        ORDER BY (LOWER(COALESCE(manufacturer,''))=LOWER(COALESCE(%s,''))) DESC, product_id
-                        LIMIT %s""",
-                    (pid, category, manufacturer or "", limit),
-                )
-                results = list(cur.fetchall())
+                # 1) Same category, manufacturer priority
+                if category:
+                    cur.execute(
+                        f"""SELECT {COLS} FROM public.products
+                            WHERE product_id <> %s AND category = %s
+                            ORDER BY (LOWER(COALESCE(manufacturer,''))=LOWER(COALESCE(%s,''))) DESC, product_id
+                            LIMIT %s""",
+                        (pid, category, manufacturer or "", limit),
+                    )
+                    results = list(cur.fetchall())
 
-            # 2) Same manufacturer, any category
-            if len(results) < limit and manufacturer:
-                seen = [r[0] for r in results] or ["__none__"]
-                cur.execute(
-                    f"""SELECT {COLS} FROM public.products
-                        WHERE product_id <> %s
-                          AND LOWER(TRIM(COALESCE(manufacturer,''))) = LOWER(TRIM(%s))
-                          AND product_id <> ALL(%s)
-                        ORDER BY product_id
-                        LIMIT %s""",
-                    (pid, manufacturer, seen, limit - len(results)),
-                )
-                results += list(cur.fetchall())
+                # 2) Same manufacturer, any category
+                if len(results) < limit and manufacturer:
+                    seen = [r[0] for r in results] or ["__none__"]
+                    cur.execute(
+                        f"""SELECT {COLS} FROM public.products
+                            WHERE product_id <> %s
+                              AND LOWER(TRIM(COALESCE(manufacturer,''))) = LOWER(TRIM(%s))
+                              AND product_id <> ALL(%s)
+                            ORDER BY product_id
+                            LIMIT %s""",
+                        (pid, manufacturer, seen, limit - len(results)),
+                    )
+                    results += list(cur.fetchall())
 
-            # 3) Same source, fill — uses index on source
-            if len(results) < limit:
-                seen = [r[0] for r in results] or ["__none__"]
-                src_cond = "AND source = %s" if source else ""
-                src_val  = [source] if source else []
-                cur.execute(
-                    f"""SELECT {COLS} FROM public.products
-                        WHERE product_id <> %s
-                          AND product_id <> ALL(%s)
-                          AND image_url IS NOT NULL
-                          {src_cond}
-                        ORDER BY product_id
-                        LIMIT %s""",
-                    [pid, seen] + src_val + [limit - len(results)],
-                )
-                results += list(cur.fetchall())
+                # 3) Same source, fill — uses index on source
+                if len(results) < limit:
+                    seen = [r[0] for r in results] or ["__none__"]
+                    src_cond = "AND source = %s" if source else ""
+                    src_val  = [source] if source else []
+                    cur.execute(
+                        f"""SELECT {COLS} FROM public.products
+                            WHERE product_id <> %s
+                              AND product_id <> ALL(%s)
+                              AND image_url IS NOT NULL
+                              {src_cond}
+                            ORDER BY product_id
+                            LIMIT %s""",
+                        [pid, seen] + src_val + [limit - len(results)],
+                    )
+                    results += list(cur.fetchall())
 
-            cols = [d[0] for d in cur.description]
-            return [dict(zip(cols, r)) for r in results[:limit]]
-    except Exception:
-        return []
-    finally:
-        _put(db)
+                cols = [d[0] for d in cur.description]
+                return [dict(zip(cols, r)) for r in results[:limit]]
+        except DbUnavailableError:
+            raise
+        except Exception:
+            return []
 
 
 def fetch_product(pid: str) -> Optional[Dict]:
-    db = _conn()
-    try:
+    with _db() as db:
         with db.cursor() as cur:
             cur.execute(
                 """SELECT product_id, manufacturer, description, image_url,
@@ -436,8 +480,6 @@ def fetch_product(pid: str) -> Optional[Dict]:
             cols = [d[0] for d in cur.description]
             row = cur.fetchone()
             return dict(zip(cols, row)) if row else None
-    finally:
-        _put(db)
 
 
 def _page_nums(cur: int, total: int) -> List:
@@ -526,8 +568,14 @@ def _send_brevo(payload: Dict[str, str]) -> Tuple[bool, str]:
 # ── Marketing routes ─────────────────────────────────────────────────────────
 @app.route("/")
 def index():
-    latest_posts = _blog_get_all(include_drafts=False)[:4]
-    return render_template("index.html", latest_posts=latest_posts)
+    latest_posts: List[Dict] = []
+    blog_db_error = False
+    try:
+        latest_posts = _blog_get_all(include_drafts=False)[:4]
+    except DbUnavailableError as exc:
+        _log_db_error("index blog", exc)
+        blog_db_error = True
+    return render_template("index.html", latest_posts=latest_posts, blog_db_error=blog_db_error)
 
 
 @app.route("/about")
@@ -648,17 +696,33 @@ def news():
         if ns in ("company", "industry"):
             return ns
         return _news_bucket(p.get("category"))
-    all_posts = _blog_get_all(include_drafts=False)
-    posts = [p for p in all_posts if bucket_of(p) == tab]
+    try:
+        all_posts = _blog_get_all(include_drafts=False)
+        posts = [p for p in all_posts if bucket_of(p) == tab]
+    except DbUnavailableError as exc:
+        _log_db_error("news", exc)
+        return _render_db_unavailable(
+            page_title="News Unavailable",
+            back_url="/",
+            back_label="Back to Home",
+        )
     return render_template("news.html", posts=posts, active_tab=tab)
 
 
 @app.route("/news/<slug>")
 def news_post(slug):
-    post = _blog_get_slug(slug)
-    if not post or post["status"] != "published":
-        abort(404)
-    recent = [p for p in _blog_get_all() if p["slug"] != slug][:4]
+    try:
+        post = _blog_get_slug(slug)
+        if not post or post["status"] != "published":
+            abort(404)
+        recent = [p for p in _blog_get_all() if p["slug"] != slug][:4]
+    except DbUnavailableError as exc:
+        _log_db_error("news_post", exc)
+        return _render_db_unavailable(
+            page_title="Article Unavailable",
+            back_url="/news",
+            back_label="Back to News",
+        )
     return render_template("news_post.html", post=post, recent=recent)
 
 
@@ -692,7 +756,11 @@ def admin_logout():
 @app.route("/admin/posts")
 @login_required
 def admin_posts():
-    posts = _blog_get_all(include_drafts=True)
+    try:
+        posts = _blog_get_all(include_drafts=True)
+    except DbUnavailableError as exc:
+        _log_db_error("admin_posts", exc)
+        return _render_db_unavailable(page_title="Admin Unavailable", back_url="/")
     return render_template("admin/posts.html", posts=posts)
 
 
@@ -716,7 +784,11 @@ def admin_post_new():
             "seo_description": request.form.get("seo_description", ""),
             "status": request.form.get("status", "draft"),
         }
-        _blog_create(data)
+        try:
+            _blog_create(data)
+        except DbUnavailableError as exc:
+            _log_db_error("admin_post_new", exc)
+            return _render_db_unavailable(page_title="Admin Unavailable", back_url="/admin/posts", back_label="Back to Posts")
         flash("Post created successfully.", "success")
         return redirect(url_for("admin_posts"))
     return render_template("admin/post_editor.html", post=None)
@@ -725,7 +797,11 @@ def admin_post_new():
 @app.route("/admin/posts/<int:post_id>/edit", methods=["GET", "POST"])
 @login_required
 def admin_post_edit(post_id):
-    post = _blog_get_id(post_id)
+    try:
+        post = _blog_get_id(post_id)
+    except DbUnavailableError as exc:
+        _log_db_error("admin_post_edit", exc)
+        return _render_db_unavailable(page_title="Admin Unavailable", back_url="/admin/posts", back_label="Back to Posts")
     if not post:
         abort(404)
     if request.method == "POST":
@@ -745,7 +821,11 @@ def admin_post_edit(post_id):
             "seo_description": request.form.get("seo_description", ""),
             "status": request.form.get("status", "draft"),
         }
-        _blog_update(post_id, data)
+        try:
+            _blog_update(post_id, data)
+        except DbUnavailableError as exc:
+            _log_db_error("admin_post_edit save", exc)
+            return _render_db_unavailable(page_title="Admin Unavailable", back_url="/admin/posts", back_label="Back to Posts")
         flash("Post updated successfully.", "success")
         return redirect(url_for("admin_posts"))
     return render_template("admin/post_editor.html", post=post)
@@ -754,7 +834,12 @@ def admin_post_edit(post_id):
 @app.route("/admin/posts/<int:post_id>/delete", methods=["POST"])
 @login_required
 def admin_post_delete(post_id):
-    _blog_delete(post_id)
+    try:
+        _blog_delete(post_id)
+    except DbUnavailableError as exc:
+        _log_db_error("admin_post_delete", exc)
+        flash("Database unavailable. Could not delete post.", "error")
+        return redirect(url_for("admin_posts"))
     flash("Post deleted.", "success")
     return redirect(url_for("admin_posts"))
 
@@ -929,7 +1014,15 @@ def catalog():
     # Product detail: /search/?q=PARTNUMBER
     detail_q = request.args.get("q", "").strip()[:SEARCH_MAX]
     if detail_q:
-        return _render_product_detail(detail_q)
+        try:
+            return _render_product_detail(detail_q)
+        except DbUnavailableError as exc:
+            _log_db_error("catalog detail", exc)
+            return _render_db_unavailable(
+                page_title="Product Unavailable",
+                back_url="/search/",
+                back_label="Back to Catalog",
+            )
 
     # Search results: /search/?query=KEYWORD
     query = request.args.get("query", "").strip()[:SEARCH_MAX]
@@ -944,17 +1037,26 @@ def catalog():
     except (ValueError, TypeError):
         page = 1
 
-    available_subcats = fetch_subcats(cat_key)
-    subcat_raw = request.args.get("subcat", "").strip()
-    subcat = subcat_raw if any(k == subcat_raw for k, _ in available_subcats) else ""
+    try:
+        available_subcats = fetch_subcats(cat_key)
+        subcat_raw = request.args.get("subcat", "").strip()
+        subcat = subcat_raw if any(k == subcat_raw for k, _ in available_subcats) else ""
 
-    mfr_raw = request.args.get("mfr", "").strip()
-    mfrs = fetch_manufacturers(cat_key, subcat or None)
-    mfr_f = mfr_raw if any(m.lower() == mfr_raw.lower() for m in mfrs) else None
+        mfr_raw = request.args.get("mfr", "").strip()
+        mfrs = fetch_manufacturers(cat_key, subcat or None)
+        mfr_f = mfr_raw if any(m.lower() == mfr_raw.lower() for m in mfrs) else None
 
-    rows, total = fetch_catalog_page(
-        cat_key, page, sort, mfr=mfr_f, q=query or None, subcat=subcat or None
-    )
+        rows, total = fetch_catalog_page(
+            cat_key, page, sort, mfr=mfr_f, q=query or None, subcat=subcat or None
+        )
+    except DbUnavailableError as exc:
+        _log_db_error("catalog", exc)
+        return _render_db_unavailable(
+            page_title="Catalog Unavailable",
+            back_url="/",
+            back_label="Back to Home",
+        )
+
     total_pages = max(1, math.ceil(total / PER_PAGE)) if total else 1
     if page > total_pages:
         page = total_pages
@@ -1016,6 +1118,9 @@ def api_search():
                     {"pid": r[0], "mfr": r[1] or "", "desc": (r[2] or "")[:70]}
                     for r in cur.fetchall()
                 ])
+    except DbUnavailableError as exc:
+        _log_db_error("api_search", exc)
+        return _db_json_error()
     except Exception:
         return jsonify([])
 
@@ -1087,10 +1192,21 @@ def robots_txt():
 
 @app.route("/sitemap.xml")
 def sitemap_index():
-    with _db() as db:
-        with db.cursor() as cur:
-            cur.execute("SELECT COUNT(*) FROM public.products")
-            total: int = cur.fetchone()[0]
+    today = datetime.date.today().isoformat()
+    try:
+        with _db() as db:
+            with db.cursor() as cur:
+                cur.execute("SELECT COUNT(*) FROM public.products")
+                total: int = cur.fetchone()[0]
+    except DbUnavailableError as exc:
+        _log_db_error("sitemap_index", exc)
+        lines = [
+            '<?xml version="1.0" encoding="UTF-8"?>',
+            '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+            f'  <sitemap><loc>{SITE_BASE}/sitemap-pages.xml</loc><lastmod>{today}</lastmod></sitemap>',
+            '</sitemapindex>',
+        ]
+        return Response("\n".join(lines), mimetype="application/xml")
 
     num_chunks = math.ceil(total / SITEMAP_CHUNK)
     today = datetime.date.today().isoformat()
@@ -1132,10 +1248,19 @@ def sitemap_products(chunk: int):
         abort(404)
     offset = (chunk - 1) * SITEMAP_CHUNK
 
-    with _db() as db:
-        with db.cursor() as cur:
-            cur.execute("SELECT COUNT(*) FROM public.products")
-            total = cur.fetchone()[0]
+    try:
+        with _db() as db:
+            with db.cursor() as cur:
+                cur.execute("SELECT COUNT(*) FROM public.products")
+                total = cur.fetchone()[0]
+    except DbUnavailableError as exc:
+        _log_db_error("sitemap_products", exc)
+        body = (
+            '<?xml version="1.0" encoding="UTF-8"?>\n'
+            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+            '</urlset>\n'
+        )
+        return Response(body, mimetype="application/xml", status=503)
 
     if offset >= total:
         abort(404)

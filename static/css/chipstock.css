@@ -2515,3 +2515,32 @@ body.cs-modal-open {
   }
 }
 
+/* Database unavailable notice */
+.db-error-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid rgba(182, 242, 35, 0.35);
+  background: rgba(182, 242, 35, 0.06);
+  color: #f5f5fa;
+  border-radius: 4px;
+}
+.db-error-icon {
+  flex-shrink: 0;
+  color: #B6F223;
+  margin-top: 2px;
+}
+.db-error-text strong {
+  display: block;
+  color: #B6F223;
+  font-size: 1rem;
+  margin-bottom: 0.35rem;
+}
+.db-error-text p {
+  margin: 0;
+  color: #aaa;
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+

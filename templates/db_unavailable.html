@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title or "Content Unavailable" }} — Chipstock{% endblock %}
+{% block extra_head %}
+<style>
+.db-unavailable-page{padding:6rem 2rem 8rem;max-width:720px;margin:0 auto;text-align:center}
+.db-unavailable-page .db-error-banner{text-align:left;margin:0 auto}
+.db-unavailable-back{margin-top:2rem}
+.db-unavailable-back a{color:#B6F223;text-decoration:none;font-weight:600}
+.db-unavailable-back a:hover{text-decoration:underline}
+</style>
+{% endblock %}
+{% block content %}
+<main class="db-unavailable-page">
+  {% include "partials/db_error.html" %}
+  {% if back_url %}
+  <div class="db-unavailable-back">
+    <a href="{{ back_url }}">← {{ back_label or "Go back" }}</a>
+  </div>
+  {% endif %}
+</main>
+{% endblock %}

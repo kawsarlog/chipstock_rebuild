@@ -398,6 +398,11 @@
                 </div>
             </div>
             <div class="seven_items home-seven-carousel">
+                {% if blog_db_error %}
+                <div style="padding:1rem 0;max-width:640px;">
+                    {% include "partials/db_error.html" %}
+                </div>
+                {% else %}
                 {% for p in latest_posts %}
                 <a class="seven_item" href="/news/{{ p.slug }}">
                     <div class="seven_item_image">
@@ -427,6 +432,7 @@
                     <div class="seven_item_link"><svg class="link-arrow" width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 9H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M10 3L16 9L10 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
                 </a>
                 {% endfor %}
+                {% endif %}
             </div>
             <div class="seven_mob_link seven_link">
                 <a class="link_basic" href="/news">All News
