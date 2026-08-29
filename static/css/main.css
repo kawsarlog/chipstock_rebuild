@@ -4213,8 +4213,11 @@ font-size: 1.2133vw;
   margin-left: auto;
   width: 34.1145vw;
   flex-shrink: 0;
+  font-size: 0.9375vw;
+  line-height: 1.6;
 }
 .quality_page .second_item_text p {
+  font-size: inherit;
   line-height: 1.6;
 }
 .quality_page .third_section {
@@ -4345,6 +4348,16 @@ font-size: 1.2133vw;
     margin-left: 0;
     width: 100%;
     order: 3;
+    font-size: clamp(0.875rem, 3.73vw, 1rem);
+    line-height: 1.6;
+  }
+  .quality_page .second_item_text p {
+    font-size: inherit;
+    line-height: 1.6;
+  }
+  .quality_page .second_title h2 {
+    font-size: clamp(1.5rem, 8vw, 2rem);
+    line-height: 1.15;
   }
   .quality_page .third_section {
     padding: 0;
@@ -4409,11 +4422,16 @@ font-size: 1.2133vw;
     height: 1.6vw;
   }
   .quality_page .third_item_text {
-    font-size: 4.8vw;
+    font-size: clamp(1rem, 4.8vw, 1.125rem);
   }
   .quality_page .third_right {
     margin-top: 6.4vw;
     padding: 0 4.2666vw;
+  }
+  .quality_page .third_text,
+  .quality_page .third_text p {
+    font-size: clamp(0.875rem, 3.73vw, 1rem);
+    line-height: 1.6;
   }
 }
 .no-point {
