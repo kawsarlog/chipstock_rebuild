@@ -91,8 +91,10 @@
           </div>
           <div class="catalog-card-body">
             <div class="catalog-card-mfr">{{ r.manufacturer or '—' }}</div>
-            <h3 class="catalog-card-title">{{ (r.description or r.product_id)[:90] }}</h3>
-            <div class="catalog-card-pn">{{ r.product_id }}</div>
+            <h3 class="catalog-card-pn">{{ r.product_id }}</h3>
+            {% if r.description %}
+            <div class="catalog-card-title">{{ r.description[:90] }}</div>
+            {% endif %}
             {% if r.category %}
             <div class="catalog-card-cat">{{ r.category }}{% if r.subcategory %} / {{ r.subcategory }}{% endif %}</div>
             {% endif %}
