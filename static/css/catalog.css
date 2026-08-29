@@ -114,6 +114,21 @@
     width: 100%;
     max-width: none;
   }
+
+  .detail-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .detail-actions .main_button_basic.button_basic {
+    width: 100%;
+    max-width: 20rem;
+    min-height: 44px;
+    padding: 0.75rem 1.25rem;
+    font-size: clamp(0.875rem, 3.73vw, 1rem);
+    box-sizing: border-box;
+  }
 }
 
 /* Card — S42-style diagonal lime sweep hover */
@@ -281,10 +296,10 @@
 .detail-avail-row strong { color: #B6F223; }
 
 .detail-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; }
-/* Slightly smaller than global .button_basic (was padding 0.9635vw 2.3958vw / font-size 0.9375vw) */
+/* Slightly smaller than global .button_basic; clamp prevents invisible text on narrow viewports */
 .detail-actions .main_button_basic.button_basic {
-  padding: 0.84vw 2.1vw;
-  font-size: 0.82vw;
+  padding: clamp(0.65rem, 0.84vw, 0.9rem) clamp(1.25rem, 2.1vw, 2rem);
+  font-size: clamp(0.8125rem, 0.82vw, 0.9375rem);
 }
 .detail-email-link { font-size: .85rem; color: #B6F223; text-decoration: underline; }
 
